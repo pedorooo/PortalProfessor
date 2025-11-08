@@ -46,7 +46,6 @@ export function useClasses() {
 
   const addClass = useCallback((classData: Omit<Class, "id">) => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       const newClass: Class = {
         ...classData,
@@ -59,7 +58,6 @@ export function useClasses() {
 
   const updateClass = useCallback((id: string, updates: Partial<Class>) => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setClasses((prev) =>
         prev.map((cls) => (cls.id === id ? { ...cls, ...updates } : cls))
@@ -70,7 +68,6 @@ export function useClasses() {
 
   const deleteClass = useCallback((id: string) => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setClasses((prev) => prev.filter((cls) => cls.id !== id));
       setIsLoading(false);

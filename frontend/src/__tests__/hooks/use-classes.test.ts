@@ -210,7 +210,6 @@ describe("useClasses hook", () => {
       const initialCount = result.current.classes.length;
       let newClassId: string;
 
-      // Add new class
       act(() => {
         result.current.addClass({
           name: "Test Class",
@@ -229,7 +228,6 @@ describe("useClasses hook", () => {
       newClassId = result.current.classes[0].id;
       expect(result.current.classes).toHaveLength(initialCount + 1);
 
-      // Delete the new class
       act(() => {
         result.current.deleteClass(newClassId);
       });
@@ -246,7 +244,6 @@ describe("useClasses hook", () => {
 
       let newClassId: string;
 
-      // Add new class
       act(() => {
         result.current.addClass({
           name: "Python Programming",
@@ -264,7 +261,6 @@ describe("useClasses hook", () => {
 
       newClassId = result.current.classes[0].id;
 
-      // Update the new class
       act(() => {
         result.current.updateClass(newClassId, {
           studentCount: 20,
@@ -275,7 +271,6 @@ describe("useClasses hook", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // Filter for the new class
       const filtered = result.current.filterClasses("Python");
 
       expect(filtered).toHaveLength(1);

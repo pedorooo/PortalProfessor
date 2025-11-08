@@ -14,8 +14,6 @@ export default class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // You could log to an external service here
-    // console.error(error, info)
     this.setState({ error });
   }
 

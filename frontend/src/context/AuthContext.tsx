@@ -25,7 +25,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock database de usuários - em produção seria da API
 const MOCK_USERS: Record<string, { password: string; name: string }> = {
   "professor@example.com": {
     password: "password123",
@@ -66,19 +65,16 @@ export function AuthProvider({
     setError(null);
 
     try {
-      // Validate inputs
       if (!email || !password) {
         throw new Error("Email e senha são obrigatórios");
       }
 
-      // Validar credenciais contra usuários mockados
       const mockUser = MOCK_USERS[email];
 
       if (!mockUser?.password || mockUser.password !== password) {
         throw new Error("Email ou senha inválidos");
       }
 
-      // Criar usuário autenticado
       const authenticatedUser: User = {
         id: "1",
         email: email,
@@ -87,12 +83,10 @@ export function AuthProvider({
 
       const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 
-      // Store in localStorage
       localStorage.setItem("token", mockToken);
       localStorage.setItem("user", JSON.stringify(authenticatedUser));
 
       setUser(authenticatedUser);
-      // Use standard navigation to avoid depending on next/navigation types
       globalThis.location.href = "/dashboard";
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Login failed";
@@ -105,7 +99,6 @@ export function AuthProvider({
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    // Use standard navigation to avoid depending on next/navigation types
     globalThis.location.href = "/login";
   }, []);
 

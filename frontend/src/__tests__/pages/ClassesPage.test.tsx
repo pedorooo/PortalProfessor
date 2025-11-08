@@ -2,7 +2,6 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import ClassesPage from "@/pages/ClassesPage";
 
-// Mock the useClasses hook
 vi.mock("@/hooks/use-classes", () => ({
   useClasses: () => ({
     classes: [
@@ -238,7 +237,6 @@ describe("ClassesPage", () => {
     it("should render subject filter dropdown", () => {
       render(<ClassesPage />);
 
-      // The filter component should be rendered as part of the filters section
       const filtersLabel = screen.getByText("Filtros");
       expect(filtersLabel).toBeInTheDocument();
     });
@@ -246,7 +244,6 @@ describe("ClassesPage", () => {
     it("should render filter section with icon and label", () => {
       render(<ClassesPage />);
 
-      // Verify the Filtros label is present
       expect(screen.getByText("Filtros")).toBeInTheDocument();
     });
   });
@@ -255,11 +252,9 @@ describe("ClassesPage", () => {
     it("should support search and filter together", () => {
       render(<ClassesPage />);
 
-      // Verify both search and filter inputs are present
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       expect(searchInput).toBeInTheDocument();
 
-      // Verify filter section is present
       const filtersLabel = screen.getByText("Filtros");
       expect(filtersLabel).toBeInTheDocument();
     });
@@ -279,15 +274,12 @@ describe("ClassesPage", () => {
       const menuButtons = screen.getAllByTitle("Class actions");
       expect(menuButtons.length).toBeGreaterThan(0);
 
-      // Radix UI dropdown interactions are complex to test in unit tests
-      // This verifies the dropdown buttons are present and clickable
       fireEvent.click(menuButtons[0]);
     });
 
     it("should render component without errors", () => {
       render(<ClassesPage />);
 
-      // Verify main content is rendered
       expect(screen.getByText("Turmas")).toBeInTheDocument();
       expect(screen.getAllByTitle("Class actions").length).toBeGreaterThan(0);
     });
@@ -339,7 +331,6 @@ describe("ClassesPage", () => {
         ).toBeInTheDocument();
       });
 
-      // Should not show the "create first class" message
       expect(
         screen.queryByText(/Crie sua primeira turma para começar/)
       ).not.toBeInTheDocument();
@@ -360,7 +351,6 @@ describe("ClassesPage", () => {
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       expect(searchInput).toBeInTheDocument();
 
-      // Verify filter section is present
       const filtersLabel = screen.getByText("Filtros");
       expect(filtersLabel).toBeInTheDocument();
     });
