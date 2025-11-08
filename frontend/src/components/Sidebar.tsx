@@ -74,8 +74,8 @@ export default function Sidebar({ open, onOpenChange }: SidebarProps) {
               className={cn(
                 "flex items-center gap-4 px-5 py-4 rounded-lg transition-colors w-full",
                 isActive(item.href)
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/40",
+                  ? "bg-purple-600 text-white font-semibold shadow-md"
+                  : "text-sidebar-foreground hover:bg-purple-600/20 hover:text-purple-700",
                 item.disabled && "opacity-50 cursor-not-allowed"
               )}
             >
