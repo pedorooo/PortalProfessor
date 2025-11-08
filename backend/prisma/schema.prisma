@@ -19,6 +19,7 @@ model User {
   professor     Professor?
   student       Student?
   admin         Admin?
+  refreshTokens  RefreshToken[]
 }
 
 enum Role {
@@ -166,4 +167,14 @@ model EvaluationSubmission {
   feedback       String?
   student        Student     @relation(fields: [studentId], references: [id])
   evaluation     Evaluation  @relation(fields: [evaluationId], references: [id])
+}
+
+model RefreshToken {
+  id         Int      @id @default(autoincrement())
+  tokenHash  String   @unique
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  revoked    Boolean  @default(false)
 }
