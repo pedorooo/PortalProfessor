@@ -50,11 +50,11 @@ export default function Sidebar({ open, onOpenChange }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed md:relative w-64 h-full bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50 md:z-auto",
+          "fixed md:relative w-80 h-full bg-sidebar border-r border-sidebar-border transition-all duration-300 z-50 md:z-auto",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <div className="p-4 border-b border-sidebar-border flex items-center justify-between md:hidden">
+        <div className="p-8 border-b border-sidebar-border flex items-center justify-between md:hidden">
           <Button
             variant="ghost"
             size="icon"
@@ -65,22 +65,22 @@ export default function Sidebar({ open, onOpenChange }: SidebarProps) {
           </Button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
               onClick={() => onOpenChange(false)}
               className={cn(
-                "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
+                "flex items-center gap-4 px-5 py-4 rounded-lg transition-colors w-full",
                 isActive(item.href)
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/20",
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/40",
                 item.disabled && "opacity-50 cursor-not-allowed"
               )}
             >
-              <item.icon className="w-4 h-4" />
-              <span className="text-sm font-medium">{item.label}</span>
+              <item.icon className="w-6 h-6 flex-shrink-0" />
+              <span className="text-lg font-medium">{item.label}</span>
             </Link>
           ))}
         </nav>

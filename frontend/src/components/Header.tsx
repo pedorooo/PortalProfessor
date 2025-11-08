@@ -21,7 +21,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header className="border-b border-border bg-background">
-      <div className="flex items-center justify-between h-16 px-6">
+      <div className="flex items-center justify-between h-20 px-6">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -34,7 +34,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           <div className="items-center gap-2 font-bold text-lg hidden md:flex">
             <BookMarked className="w-5 h-5" />
-            <span>Portal do Professor</span>
+            <h1 className="text-xl">Portal do Professor</h1>
           </div>
         </div>
 
@@ -57,7 +57,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="text-destructive">
               <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
