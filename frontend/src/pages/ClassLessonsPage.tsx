@@ -3,11 +3,13 @@ import { ArrowLeft, Calendar, Clock, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useClasses } from "@/hooks/use-classes";
+import { useClassLessons } from "@/hooks/use-class-lessons";
 
 export default function ClassLessonsPage() {
   const navigate = useNavigate();
   const { classId } = useParams<{ classId: string }>();
   const { classes } = useClasses();
+  const { lessons: mockLessons } = useClassLessons(classId || "");
 
   // Find the class by ID
   const classData = classes.find((cls) => cls.id === classId);
@@ -29,59 +31,6 @@ export default function ClassLessonsPage() {
       </div>
     );
   }
-
-  // Mock lesson data
-  const mockLessons = [
-    {
-      id: "1",
-      topic: "Introdução à Álgebra Linear",
-      date: "1 de novembro",
-      duration: "90 minutos",
-      status: "Concluída",
-      content:
-        "Conceitos fundamentais de álgebra linear, matrizes e operações básicas.",
-    },
-    {
-      id: "2",
-      topic: "Sistemas de Equações Lineares",
-      date: "3 de novembro",
-      duration: "90 minutos",
-      status: "Concluída",
-      content: "Resolução de sistemas lineares usando diferentes métodos.",
-    },
-    {
-      id: "3",
-      topic: "Espaços Vetoriais",
-      date: "5 de novembro",
-      duration: "90 minutos",
-      status: "Concluída",
-      content: "Propriedades e definições de espaços vetoriais.",
-    },
-    {
-      id: "4",
-      topic: "Transformações Lineares",
-      date: "8 de novembro",
-      duration: "90 minutos",
-      status: "Em Progresso",
-      content: "Estudo de transformações lineares e suas aplicações.",
-    },
-    {
-      id: "5",
-      topic: "Autovalores e Autovetores",
-      date: "10 de novembro",
-      duration: "90 minutos",
-      status: "Programada",
-      content: "Cálculo e interpretação de autovalores e autovetores.",
-    },
-    {
-      id: "6",
-      topic: "Diagonalização de Matrizes",
-      date: "12 de novembro",
-      duration: "90 minutos",
-      status: "Programada",
-      content: "Processo de diagonalização e aplicações práticas.",
-    },
-  ];
 
   const getStatusBadge = (status: string) => {
     let classes = "px-3 py-1 text-xs font-semibold rounded-full";
