@@ -18,12 +18,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, Filter } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  Plus,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  Filter,
+} from "lucide-react";
 import { StudentDialog } from "@/components/students/student-dialog";
 import type { Student } from "@/types";
 
 export default function StudentsPage() {
-  const { students, isLoading, addStudent, updateStudent } = useStudents();
+  const { students, isLoading, addStudent, updateStudent, deleteStudent } =
+    useStudents();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,6 +71,11 @@ export default function StudentsPage() {
     updateStudent(student.id, student);
     setEditingStudent(null);
     setIsDialogOpen(false);
+  };
+
+  const handleEdit = (student: Student) => {
+    setEditingStudent(student);
+    setIsDialogOpen(true);
   };
 
   const handleSubmit = (student: Student | Omit<Student, "id">) => {
@@ -108,10 +127,8 @@ export default function StudentsPage() {
 
             <div className="flex gap-4 items-center flex-wrap">
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Filter className="h-4 w-4" />
-                  <span>Filtros:</span>
-                </div>
+                <Filter className="h-4 w-4 text-gray-600" />
+                <span className="text-sm font-medium">Filtros:</span>
               </div>
               <Select value={classFilter} onValueChange={setClassFilter}>
                 <SelectTrigger className="w-40 bg-gray-100">
@@ -158,6 +175,8 @@ export default function StudentsPage() {
                     <TableHead className="py-3">Turma</TableHead>
                     <TableHead className="py-3 text-right">Média</TableHead>
                     <TableHead className="py-3">Status</TableHead>
+                    <TableHead className="py-3">Data de Matrícula</TableHead>
+                    <TableHead className="py-3 w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -196,6 +215,47 @@ export default function StudentsPage() {
                         >
                           {student.status === "active" ? "ativo" : "inativo"}
                         </span>
+                      </TableCell>
+                      <TableCell className="py-4 text-sm text-muted-foreground">
+                        {new Date(student.enrollmentDate).toLocaleDateString(
+                          "pt-BR"
+                        )}
+                      </TableCell>
+                      <TableCell className="py-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(student)}
+                            >
+                              <Edit2 className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (
+                                  confirm(
+                                    "Tem certeza que deseja deletar este aluno?"
+                                  )
+                                ) {
+                                  deleteStudent(student.id);
+                                }
+                              }}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Deletar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
