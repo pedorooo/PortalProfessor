@@ -1,11 +1,16 @@
-"use client";
-
 import { useState, useMemo } from "react";
 import { useClasses } from "@/hooks/use-classes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Edit2, Trash2, Search, Users, MoreVertical } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  MoreVertical,
+  Filter,
+} from "lucide-react";
 import { ClassDialog } from "@/components/classes/class-dialog";
 import {
   DropdownMenu,
@@ -13,61 +18,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SUBJECT_COLORS, SUBJECTS } from "@/constants/subjects";
 import type { Class } from "@/types";
-
-const SUBJECT_COLORS: Record<
-  string,
-  { bg: string; text: string; badge: string; bar: string }
-> = {
-  Matemática: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    badge: "bg-blue-100 text-blue-800",
-    bar: "bg-blue-700",
-  },
-  Português: {
-    bg: "bg-green-50",
-    text: "text-green-700",
-    badge: "bg-green-100 text-green-800",
-    bar: "bg-green-700",
-  },
-  Química: {
-    bg: "bg-purple-50",
-    text: "text-purple-700",
-    badge: "bg-purple-100 text-purple-800",
-    bar: "bg-purple-700",
-  },
-  Física: {
-    bg: "bg-orange-50",
-    text: "text-orange-700",
-    badge: "bg-orange-100 text-orange-800",
-    bar: "bg-orange-700",
-  },
-  História: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    badge: "bg-amber-100 text-amber-800",
-    bar: "bg-amber-700",
-  },
-  Geografia: {
-    bg: "bg-teal-50",
-    text: "text-teal-700",
-    badge: "bg-teal-100 text-teal-800",
-    bar: "bg-teal-700",
-  },
-  Inglês: {
-    bg: "bg-red-50",
-    text: "text-red-700",
-    badge: "bg-red-100 text-red-800",
-    bar: "bg-red-700",
-  },
-  Biologia: {
-    bg: "bg-lime-50",
-    text: "text-lime-700",
-    badge: "bg-lime-100 text-lime-800",
-    bar: "bg-lime-700",
-  },
-};
 
 export default function ClassesPage() {
   const { isLoading, addClass, updateClass, deleteClass, filterClasses } =
@@ -75,11 +34,15 @@ export default function ClassesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState<string>("all");
 
-  const filteredClasses = useMemo(
-    () => filterClasses(searchTerm),
-    [searchTerm, filterClasses]
-  );
+  const filteredClasses = useMemo(() => {
+    let classes = filterClasses(searchTerm);
+    if (selectedSubject !== "all") {
+      classes = classes.filter((cls) => cls.subject === selectedSubject);
+    }
+    return classes;
+  }, [searchTerm, selectedSubject, filterClasses]);
 
   const handleAddClass = (classData: Omit<Class, "id">) => {
     addClass(classData);
@@ -126,14 +89,37 @@ export default function ClassesPage() {
       </div>
 
       {/* Search */}
-      <div className="relative max-w-xs">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar turmas..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      <div className="flex justify-between">
+        <div className="relative max-w-4xl w-80">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar turmas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <span className="font-medium">Filtros</span>
+          </div>
+          <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filtrar por disciplina" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as disciplinas</SelectItem>
+              {SUBJECTS.map((subject) => (
+                <SelectItem key={subject} value={subject}>
+                  {subject}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Classes Grid */}
