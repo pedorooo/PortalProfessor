@@ -19,6 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -40,6 +48,8 @@ export default function StudentsPage() {
     useStudents();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -241,13 +251,8 @@ export default function StudentsPage() {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
-                                if (
-                                  confirm(
-                                    "Tem certeza que deseja deletar este aluno?"
-                                  )
-                                ) {
-                                  deleteStudent(student.id);
-                                }
+                                setStudentToDelete(student);
+                                setIsDeleteDialogOpen(true);
                               }}
                               className="text-red-600"
                             >
@@ -273,6 +278,40 @@ export default function StudentsPage() {
         student={editingStudent || undefined}
         isLoading={isLoading}
       />
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deletar Aluno</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja deletar este aluno?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setStudentToDelete(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (studentToDelete) {
+                  deleteStudent(studentToDelete.id);
+                  setIsDeleteDialogOpen(false);
+                  setStudentToDelete(null);
+                }
+              }}
+            >
+              Deletar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
