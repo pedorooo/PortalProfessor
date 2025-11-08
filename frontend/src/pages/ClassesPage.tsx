@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useClasses } from "@/hooks/use-classes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -38,6 +39,7 @@ import { SUBJECT_COLORS, SUBJECTS } from "@/constants/subjects";
 import type { Class } from "@/types";
 
 export default function ClassesPage() {
+  const navigate = useNavigate();
   const { isLoading, addClass, updateClass, deleteClass, filterClasses } =
     useClasses();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -177,7 +179,8 @@ export default function ClassesPage() {
             return (
               <Card
                 key={classData.id}
-                className="hover:shadow-lg transition-shadow bg-white flex flex-col"
+                className="hover:shadow-lg transition-shadow bg-white flex flex-col cursor-pointer"
+                onClick={() => navigate(`/dashboard/classes/${classData.id}`)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
@@ -205,17 +208,26 @@ export default function ClassesPage() {
                           size="sm"
                           className="h-8 w-8 p-0"
                           title="Class actions"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(classData)}>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(classData);
+                          }}
+                        >
                           <Edit2 className="h-4 w-4 mr-2" />
                           Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteClick(classData)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(classData);
+                          }}
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
