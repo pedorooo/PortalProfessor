@@ -1,97 +1,75 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ClassesPage from "@/pages/ClassesPage";
+
+const mockClasses = [
+  {
+    id: "1",
+    name: "Matemática Avançada",
+    maxCapacity: 30,
+    studentCount: 28,
+    professor: "Dr. Smith",
+    subject: "Matemática",
+    description: "Tópicos avançados em álgebra, geometria e cálculo",
+  },
+  {
+    id: "2",
+    name: "Fundamentos de Física",
+    maxCapacity: 35,
+    studentCount: 32,
+    professor: "Prof. Johnson",
+    subject: "Física",
+    description: "Introdução à mecânica e termodinâmica",
+  },
+  {
+    id: "3",
+    name: "Laboratório de Química",
+    maxCapacity: 25,
+    studentCount: 22,
+    professor: "Dr. Williams",
+    subject: "Química",
+    description: "Experimentos práticos de laboratório e reações químicas",
+  },
+  {
+    id: "4",
+    name: "Literatura em Inglês",
+    maxCapacity: 40,
+    studentCount: 38,
+    professor: "Ms. Brown",
+    subject: "Inglês",
+    description: "Explore a literatura inglesa clássica e contemporânea",
+  },
+];
 
 vi.mock("@/hooks/use-classes", () => ({
   useClasses: () => ({
-    classes: [
-      {
-        id: "1",
-        name: "Matemática Avançada",
-        maxCapacity: 30,
-        studentCount: 28,
-        professor: "Dr. Smith",
-        subject: "Matemática",
-        description: "Tópicos avançados em álgebra, geometria e cálculo",
-      },
-      {
-        id: "2",
-        name: "Fundamentos de Física",
-        maxCapacity: 35,
-        studentCount: 32,
-        professor: "Prof. Johnson",
-        subject: "Física",
-        description: "Introdução à mecânica e termodinâmica",
-      },
-      {
-        id: "3",
-        name: "Laboratório de Química",
-        maxCapacity: 25,
-        studentCount: 22,
-        professor: "Dr. Williams",
-        subject: "Química",
-        description: "Experimentos práticos de laboratório e reações químicas",
-      },
-      {
-        id: "4",
-        name: "Literatura em Inglês",
-        maxCapacity: 40,
-        studentCount: 38,
-        professor: "Ms. Brown",
-        subject: "Inglês",
-        description: "Explore a literatura inglesa clássica e contemporânea",
-      },
-    ],
+    classes: mockClasses,
     isLoading: false,
     addClass: vi.fn(),
     updateClass: vi.fn(),
     deleteClass: vi.fn(),
     filterClasses: (search: string) => {
-      const classes = [
-        {
-          id: "1",
-          name: "Matemática Avançada",
-          maxCapacity: 30,
-          studentCount: 28,
-          professor: "Dr. Smith",
-          subject: "Matemática",
-          description: "Tópicos avançados em álgebra, geometria e cálculo",
-        },
-        {
-          id: "2",
-          name: "Fundamentos de Física",
-          maxCapacity: 35,
-          studentCount: 32,
-          professor: "Prof. Johnson",
-          subject: "Física",
-          description: "Introdução à mecânica e termodinâmica",
-        },
-        {
-          id: "3",
-          name: "Laboratório de Química",
-          maxCapacity: 25,
-          studentCount: 22,
-          professor: "Dr. Williams",
-          subject: "Química",
-          description:
-            "Experimentos práticos de laboratório e reações químicas",
-        },
-        {
-          id: "4",
-          name: "Literatura em Inglês",
-          maxCapacity: 40,
-          studentCount: 38,
-          professor: "Ms. Brown",
-          subject: "Inglês",
-          description: "Explore a literatura inglesa clássica e contemporânea",
-        },
-      ];
-      return classes.filter((cls) =>
+      return mockClasses.filter((cls) =>
         cls.name.toLowerCase().includes(search.toLowerCase())
       );
     },
   }),
 }));
+
+const renderWithRouter = (component: React.ReactElement) => {
+  return render(
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={component} />
+        <Route
+          path="/dashboard/classes/:classId"
+          element={<div>Class Detail</div>}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
 describe("ClassesPage", () => {
   beforeEach(() => {
@@ -100,7 +78,7 @@ describe("ClassesPage", () => {
 
   describe("rendering", () => {
     it("should render the page title and description", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Turmas")).toBeInTheDocument();
       expect(
@@ -109,7 +87,7 @@ describe("ClassesPage", () => {
     });
 
     it("should render the add button", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const addButton = screen.getByRole("button", {
         name: /Adicionar Turma/i,
@@ -118,20 +96,20 @@ describe("ClassesPage", () => {
     });
 
     it("should render search input", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       expect(searchInput).toBeInTheDocument();
     });
 
     it("should render filter section with Filter icon and label", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Filtros")).toBeInTheDocument();
     });
 
     it("should render all class cards", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Matemática Avançada")).toBeInTheDocument();
       expect(screen.getByText("Fundamentos de Física")).toBeInTheDocument();
@@ -140,7 +118,7 @@ describe("ClassesPage", () => {
     });
 
     it("should render class details correctly", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Prof. Dr. Smith")).toBeInTheDocument();
       expect(screen.getByText("Prof. Prof. Johnson")).toBeInTheDocument();
@@ -149,7 +127,7 @@ describe("ClassesPage", () => {
     });
 
     it("should render subject badges with correct text", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Matemática")).toBeInTheDocument();
       expect(screen.getByText("Física")).toBeInTheDocument();
@@ -160,11 +138,9 @@ describe("ClassesPage", () => {
 
   describe("search functionality", () => {
     it("should filter classes when typing in search box", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
-      const searchInput = screen.getByPlaceholderText(
-        "Buscar turmas..."
-      ) as HTMLInputElement;
+      const searchInput = screen.getByPlaceholderText("Buscar turmas...");
 
       fireEvent.change(searchInput, { target: { value: "Matemática" } });
 
@@ -174,11 +150,9 @@ describe("ClassesPage", () => {
     });
 
     it("should show all classes when search is cleared", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
-      const searchInput = screen.getByPlaceholderText(
-        "Buscar turmas..."
-      ) as HTMLInputElement;
+      const searchInput = screen.getByPlaceholderText("Buscar turmas...");
 
       fireEvent.change(searchInput, { target: { value: "Matemática" } });
 
@@ -194,7 +168,7 @@ describe("ClassesPage", () => {
     });
 
     it("should be case-insensitive", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
 
@@ -206,7 +180,7 @@ describe("ClassesPage", () => {
     });
 
     it("should show no classes message when search has no results", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
 
@@ -220,7 +194,7 @@ describe("ClassesPage", () => {
     });
 
     it("should show hint to adjust search term in no results message", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       fireEvent.change(searchInput, { target: { value: "xyz" } });
@@ -235,14 +209,14 @@ describe("ClassesPage", () => {
 
   describe("filter functionality", () => {
     it("should render subject filter dropdown", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const filtersLabel = screen.getByText("Filtros");
       expect(filtersLabel).toBeInTheDocument();
     });
 
     it("should render filter section with icon and label", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Filtros")).toBeInTheDocument();
     });
@@ -250,7 +224,7 @@ describe("ClassesPage", () => {
 
   describe("combined search and filter", () => {
     it("should support search and filter together", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       expect(searchInput).toBeInTheDocument();
@@ -262,14 +236,14 @@ describe("ClassesPage", () => {
 
   describe("class card actions", () => {
     it("should display dropdown menu button on each card", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const menuButtons = screen.getAllByTitle("Class actions");
       expect(menuButtons.length).toBeGreaterThan(0);
     });
 
     it("should show edit and delete options in dropdown", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const menuButtons = screen.getAllByTitle("Class actions");
       expect(menuButtons.length).toBeGreaterThan(0);
@@ -278,7 +252,7 @@ describe("ClassesPage", () => {
     });
 
     it("should render component without errors", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("Turmas")).toBeInTheDocument();
       expect(screen.getAllByTitle("Class actions").length).toBeGreaterThan(0);
@@ -287,7 +261,7 @@ describe("ClassesPage", () => {
 
   describe("enrollment display", () => {
     it("should display student enrollment numbers", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       expect(screen.getByText("28/30")).toBeInTheDocument();
       expect(screen.getByText("32/35")).toBeInTheDocument();
@@ -296,7 +270,7 @@ describe("ClassesPage", () => {
     });
 
     it("should display enrollment label", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const enrollmentLabels = screen.getAllByText("Matrícula de Alunos");
       expect(enrollmentLabels.length).toBeGreaterThan(0);
@@ -305,7 +279,7 @@ describe("ClassesPage", () => {
 
   describe("empty state", () => {
     it("should show empty state message when no classes are found", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       fireEvent.change(searchInput, {
@@ -320,7 +294,7 @@ describe("ClassesPage", () => {
     });
 
     it("should show add button in empty state when search returns no results", async () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       fireEvent.change(searchInput, { target: { value: "xyz" } });
@@ -339,14 +313,14 @@ describe("ClassesPage", () => {
 
   describe("accessibility", () => {
     it("should have proper heading hierarchy", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const heading = screen.getByRole("heading", { name: /Turmas/ });
       expect(heading).toBeInTheDocument();
     });
 
     it("should have descriptive labels for inputs", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const searchInput = screen.getByPlaceholderText("Buscar turmas...");
       expect(searchInput).toBeInTheDocument();
@@ -356,7 +330,7 @@ describe("ClassesPage", () => {
     });
 
     it("should have descriptive button labels", () => {
-      render(<ClassesPage />);
+      renderWithRouter(<ClassesPage />);
 
       const addButton = screen.getByRole("button", {
         name: /Adicionar Turma/i,
