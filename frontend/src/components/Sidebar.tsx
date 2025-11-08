@@ -2,14 +2,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Users,
-  BookOpen,
-  Settings,
-  ChevronLeft,
-  BookMarked,
-} from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
