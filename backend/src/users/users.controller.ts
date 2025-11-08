@@ -78,7 +78,8 @@ export class UsersController {
   @Get(':userId')
   async getUser(@Param('userId') userIdParam: string) {
     const userId = Number.parseInt(userIdParam, 10);
-    if (Number.isNaN(userId)) {
+
+    if (Number.isNaN(userId) || !Number.isInteger(userId) || userId < 0) {
       throw new BadRequestException('Invalid user ID');
     }
 

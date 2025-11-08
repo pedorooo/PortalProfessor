@@ -46,13 +46,9 @@ export class UsersService {
     return publicUser as PublicUser;
   }
 
-  /**
-   * Update user profile fields (name, phone)
-   */
   async updateProfile(userId: number, dto: UpdateProfileDto) {
     const updateData: Record<string, unknown> = {};
 
-    // Only include fields that are defined in the DTO
     if ('name' in dto && dto.name !== undefined) {
       updateData.name = dto.name;
     }
@@ -60,7 +56,6 @@ export class UsersService {
       updateData.phone = dto.phone;
     }
 
-    // If no fields to update, just return the current user
     if (Object.keys(updateData).length === 0) {
       return this.findById(userId);
     }
