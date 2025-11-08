@@ -1,10 +1,169 @@
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int        @id @default(autoincrement())
+  email         String     @unique
+  passwordHash  String
+  name          String
+  role          Role
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  professor     Professor?
+  student       Student?
+  admin         Admin?
+}
+
+enum Role {
+  PROFESSOR
+  ADMIN
+  STUDENT
+}
+
+model Professor {
+  id        Int       @id @default(autoincrement())
+  phone     String?
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id])
+  classes   Class[]
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  phone     String?
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Student {
+  id          Int           @id @default(autoincrement())
+  phone       String?
+  userId      Int            @unique
+  user        User            @relation(fields: [userId], references: [id])
+  enrollments Enrollment[]
+  submissions EvaluationSubmission[]
+  attendances StudentLesson[]
+}
+
+model Class {
+  id            Int                    @id @default(autoincrement())
+  name          String
+  subject       String
+  description   String?
+  maxCapacity   Int
+  professorId   Int
+  professor     Professor               @relation(fields: [professorId], references: [id])
+  createdAt     DateTime                @default(now())
+
+  lessons       Lesson[]
+  enrollments   Enrollment[]
+  schedules     ClassSchedule[]
+  evaluations   Evaluation[]
+}
+
+model ClassSchedule {
+  id          Int      @id @default(autoincrement())
+  dayOfWeek   String
+  startTime   DateTime
+  endTime     DateTime
+  classId     Int
+  class       Class    @relation(fields: [classId], references: [id])
+}
+
+model Enrollment {
+  id             Int          @id @default(autoincrement())
+  studentId      Int
+  classId        Int
+  enrolledAt     DateTime     @default(now())
+  status         EnrollmentStatus @default(ACTIVE)
+  gradeAverage   Float?       // média geral
+  student        Student      @relation(fields: [studentId], references: [id])
+  class          Class        @relation(fields: [classId], references: [id])
+  grades         Grade[]
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+model Lesson {
+  id          Int           @id @default(autoincrement())
+  topic       String
+  date        DateTime
+  status      LessonStatus   @default(PLANNED)
+  duration    Int
+  content     String?
+  classId     Int
+  class       Class          @relation(fields: [classId], references: [id])
+  attendances StudentLesson[]
+}
+
+enum LessonStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+}
+
+model StudentLesson {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  lessonId    Int
+  attendance  Boolean  @default(false)
+  student     Student  @relation(fields: [studentId], references: [id])
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+}
+
+model Evaluation {
+  id          Int                    @id @default(autoincrement())
+  name        String
+  classId     Int
+  dueDate     DateTime
+  status      EvaluationStatus        @default(OPEN)
+  class       Class                   @relation(fields: [classId], references: [id])
+  criteria    EvaluationCriterion[]
+  submissions EvaluationSubmission[]
+}
+
+enum EvaluationStatus {
+  OPEN
+  CLOSED
+}
+
+model EvaluationCriterion {
+  id             Int       @id @default(autoincrement())
+  name           String
+  weight         Float   
+  description    String?
+  evaluationId   Int
+  evaluation     Evaluation @relation(fields: [evaluationId], references: [id])
+  grades         Grade[]
+}
+
+model Grade {
+  id             Int       @id @default(autoincrement())
+  enrollmentId   Int
+  criterionId    Int
+  value          Float
+  enrollment     Enrollment         @relation(fields: [enrollmentId], references: [id])
+  criterion      EvaluationCriterion @relation(fields: [criterionId], references: [id])
+}
+
+model EvaluationSubmission {
+  id             Int        @id @default(autoincrement())
+  studentId      Int
+  evaluationId   Int
+  grade          Float?
+  submittedAt    DateTime?
+  feedback       String?
+  student        Student     @relation(fields: [studentId], references: [id])
+  evaluation     Evaluation  @relation(fields: [evaluationId], references: [id])
 }
