@@ -21,15 +21,30 @@ export default function Sidebar({ open, onOpenChange }: SidebarProps) {
   const location = useLocation();
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/students", label: "Students", icon: Users },
-    { href: "/dashboard/classes", label: "Classes", icon: BookOpen },
     {
-      href: "/dashboard/evaluation-criteria",
-      label: "Evaluation Criteria",
-      icon: BookMarked,
+      href: "/dashboard",
+      label: "Painel",
+      icon: LayoutDashboard,
+      disabled: false,
     },
-    { href: "#", label: "Settings", icon: Settings, disabled: true },
+    {
+      href: "/dashboard/students",
+      label: "Alunos",
+      icon: Users,
+      disabled: false,
+    },
+    {
+      href: "/dashboard/classes",
+      label: "Turmas",
+      icon: BookOpen,
+      disabled: false,
+    },
+    // {
+    //   href: "/dashboard/evaluation-criteria",
+    //   label: "Evaluation Criteria",
+    //   icon: BookMarked,
+    // },
+    // { href: "#", label: "Settings", icon: Settings, disabled: true },
   ];
 
   const isActive = (href: string) => {
