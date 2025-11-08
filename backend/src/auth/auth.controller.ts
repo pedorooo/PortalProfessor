@@ -9,6 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginSchema, type LoginDto } from './dto/login.dto';
 import { RegisterSchema, type RegisterDto } from './dto/register.dto';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import type { Request, Response } from 'express';
 
 @Controller('auth')
@@ -16,14 +17,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() dto: unknown, @Res({ passthrough: true }) res: Response) {
-    let payload: LoginDto;
-    try {
-      payload = LoginSchema.parse(dto);
-    } catch (err) {
-      throw new BadRequestException(err);
-    }
-
+  async login(
+    @Body(new ZodValidationPipe(LoginSchema))
+    payload: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const user = await this.authService.validateUser(
       payload.email,
       payload.password,
@@ -47,14 +45,10 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() dto: unknown) {
-    let payload: RegisterDto;
-    try {
-      payload = RegisterSchema.parse(dto);
-    } catch (err) {
-      throw new BadRequestException(err);
-    }
-
+  async register(
+    @Body(new ZodValidationPipe(RegisterSchema))
+    payload: RegisterDto,
+  ) {
     const user = await this.authService.register(
       payload.email,
       payload.password,
