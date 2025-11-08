@@ -9,10 +9,10 @@ export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+    <div className="flex flex-col h-screen bg-background">
+      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex-1 flex overflow-hidden">
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
         <main className="flex-1 overflow-auto">
           <div className="p-6">
             <Outlet />
