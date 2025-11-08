@@ -25,6 +25,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SUBJECT_COLORS, SUBJECTS } from "@/constants/subjects";
 import type { Class } from "@/types";
 
@@ -35,6 +44,8 @@ export default function ClassesPage() {
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [classToDelete, setClassToDelete] = useState<Class | null>(null);
 
   const filteredClasses = useMemo(() => {
     let classes = filterClasses(searchTerm);
@@ -69,9 +80,21 @@ export default function ClassesPage() {
     }
   };
 
+  const handleDeleteClick = (classData: Class) => {
+    setClassToDelete(classData);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (classToDelete) {
+      deleteClass(classToDelete.id);
+      setDeleteConfirmOpen(false);
+      setClassToDelete(null);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Turmas</h1>
@@ -88,7 +111,6 @@ export default function ClassesPage() {
         </Button>
       </div>
 
-      {/* Search */}
       <div className="flex justify-between">
         <div className="relative max-w-4xl w-80">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -100,7 +122,6 @@ export default function ClassesPage() {
           />
         </div>
 
-        {/* Filters */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
@@ -122,7 +143,6 @@ export default function ClassesPage() {
         </div>
       </div>
 
-      {/* Classes Grid */}
       {filteredClasses.length === 0 ? (
         <Card className="bg-gray-50 border-dashed">
           <CardContent className="pt-12 pb-12 text-center">
@@ -195,7 +215,7 @@ export default function ClassesPage() {
                           Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => deleteClass(classData.id)}
+                          onClick={() => handleDeleteClick(classData)}
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -256,6 +276,28 @@ export default function ClassesPage() {
         classData={editingClass || undefined}
         isLoading={isLoading}
       />
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Turma</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar a turma{" "}
+              <strong>&quot;{classToDelete?.name}&quot;</strong>? Esta ação não
+              pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Deletar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
