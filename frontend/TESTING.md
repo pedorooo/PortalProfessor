@@ -72,6 +72,106 @@ Testes para o componente StudentsPage abrangendo:
 npm test -- StudentsPage.integration.test.tsx
 ```
 
+### 3. Testes do Hook: `src/__tests__/hooks/use-classes.test.ts`
+
+Testes para o hook `useClasses` abrangendo (14 testes):
+
+**Inicialização:**
+
+- ✅ Inicialização com turmas fictícias
+
+**Adição de Turmas (2 testes):**
+
+- ✅ Adicionar uma nova turma
+- ✅ Gerar ID único para nova turma
+
+**Atualização de Turmas (2 testes):**
+
+- ✅ Atualizar turma existente
+- ✅ Preservar outros campos ao atualizar
+
+**Exclusão de Turmas (2 testes):**
+
+- ✅ Deletar turma
+- ✅ Não afetar outras turmas ao deletar
+
+**Filtro de Turmas (5 testes):**
+
+- ✅ Filtrar turmas por nome (correspondência exata)
+- ✅ Busca case-insensitive
+- ✅ Retornar todas as turmas quando busca está vazia
+- ✅ Retornar array vazio quando não há correspondências
+- ✅ Filtrar por correspondência parcial de nome
+
+**Operações Múltiplas (2 testes):**
+
+- ✅ Manipular add e depois delete
+- ✅ Manipular add, update e filter
+
+**Executar Testes do Hook:**
+
+```bash
+npm test -- use-classes.test.ts
+```
+
+### 4. Testes de Integração: `src/__tests__/pages/ClassesPage.test.tsx`
+
+Testes para o componente ClassesPage abrangendo (25 testes):
+
+**Renderização (6 testes):**
+
+- ✅ Renderizar título e descrição da página
+- ✅ Renderizar botão adicionar turma
+- ✅ Renderizar campo de busca
+- ✅ Renderizar seção de filtros com ícone
+- ✅ Renderizar todos os cards de turmas
+- ✅ Renderizar detalhes das turmas (professor, matrículas, disciplinas)
+
+**Funcionalidade de Busca (5 testes):**
+
+- ✅ Filtrar turmas ao digitar no campo de busca
+- ✅ Mostrar todas as turmas quando busca é limpa
+- ✅ Busca case-insensitive
+- ✅ Mostrar mensagem "nenhuma turma encontrada" para buscas sem resultados
+- ✅ Exibir dica para ajustar termo de busca
+
+**Funcionalidade de Filtro (2 testes):**
+
+- ✅ Renderizar dropdown de filtro por disciplina
+- ✅ Renderizar seção de filtros com ícone e rótulo
+
+**Busca e Filtro Combinados (1 teste):**
+
+- ✅ Suportar busca e filtro simultaneamente
+
+**Ações nos Cards de Turma (3 testes):**
+
+- ✅ Exibir botão de menu dropdown em cada card
+- ✅ Mostrar opções de editar e deletar
+- ✅ Renderizar componente sem erros
+
+**Exibição de Matrículas (2 testes):**
+
+- ✅ Exibir números de matrículas (ex: 28/30)
+- ✅ Exibir rótulo de matrículas
+
+**Estado Vazio (2 testes):**
+
+- ✅ Mostrar mensagem de estado vazio quando nenhuma turma é encontrada
+- ✅ Não mostrar mensagem "criar primeira turma" para resultados de busca
+
+**Acessibilidade (3 testes):**
+
+- ✅ Hierarquia adequada de headings
+- ✅ Rótulos descritivos para inputs
+- ✅ Rótulos descritivos para botões
+
+**Executar Testes da Página de Turmas:**
+
+```bash
+npm test -- ClassesPage.test.tsx
+```
+
 ## Comandos de Teste Disponíveis
 
 ```bash
@@ -89,10 +189,25 @@ npm test:coverage
 
 # Executar arquivo de teste específico
 npm test -- use-students.test.ts
+npm test -- use-classes.test.ts
+npm test -- ClassesPage.test.tsx
+npm test -- StudentsPage.integration.test.tsx
 
 # Executar testes que correspondem a um padrão
 npm test -- --grep "add a new student"
+npm test -- --grep "ClassesPage"
 ```
+
+## Resumo de Testes
+
+| Arquivo                           | Tipo            | Testes | Status |
+| --------------------------------- | --------------- | ------ | ------ |
+| use-students.test.ts              | Unitário (Hook) | 8      | ✅     |
+| use-classes.test.ts               | Unitário (Hook) | 14     | ✅     |
+| StudentsPage.integration.test.tsx | Integração      | 15     | ✅     |
+| ClassesPage.test.tsx              | Integração      | 25     | ✅     |
+| smoke.test.ts                     | Smoke           | 4      | ✅     |
+| **Total**                         |                 | **66** | **✅** |
 
 ## Estrutura de Teste
 
