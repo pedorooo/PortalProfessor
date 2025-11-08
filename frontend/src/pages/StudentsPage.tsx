@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useMemo } from "react";
 import { useStudents } from "@/hooks/use-students";
 import { Button } from "@/components/ui/button";
@@ -78,7 +76,6 @@ export default function StudentsPage() {
 
   return (
     <div className="p-8 space-y-8">
-      {/* Header with Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Alunos</h1>
@@ -92,7 +89,6 @@ export default function StudentsPage() {
         </Button>
       </div>
 
-      {/* Students Table with Search and Filters Inside */}
       <Card>
         <CardContent className="pt-6 space-y-6">
           {/* Search and Filters */}
@@ -148,7 +144,6 @@ export default function StudentsPage() {
             </div>
           </div>
 
-          {/* Table */}
           {filteredStudents.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Nenhum aluno encontrado</p>
@@ -211,7 +206,6 @@ export default function StudentsPage() {
         </CardContent>
       </Card>
 
-      {/* Add/Edit Student Dialog */}
       <StudentDialog
         isOpen={isDialogOpen}
         onOpenChange={handleDialogOpenChange}
