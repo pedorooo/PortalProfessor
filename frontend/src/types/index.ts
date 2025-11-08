@@ -8,3 +8,21 @@ export interface Student {
   status: "active" | "inactive";
   enrollmentDate: string;
 }
+
+export interface Class {
+  id: string;
+  name: string;
+  maxCapacity: number;
+  studentCount: number;
+  professor: string;
+  description?: string;
+  subject?:
+    | "Matemática"
+    | "Português"
+    | "Química"
+    | "Física"
+    | "História"
+    | "Geografia"
+    | "Inglês"
+    | "Biologia";
+}
