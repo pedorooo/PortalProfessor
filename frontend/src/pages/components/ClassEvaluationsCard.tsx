@@ -109,7 +109,7 @@ export function ClassEvaluationsCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Create New Evaluation Form */}
+        {}
         <EvaluationForm
           isOpen={showForm}
           isLoading={creatingEval}
@@ -124,7 +124,7 @@ export function ClassEvaluationsCard({
           onCancel={handleCancelForm}
         />
 
-        {/* Evaluations List */}
+        {}
         <EvaluationList
           evaluations={evaluations}
           updatingId={updatingId}

@@ -12,7 +12,6 @@ import {
   type UpdateStudentPayload,
 } from "@/lib/api-client";
 
-// Transform API response to frontend Student type
 function transformStudent(apiStudent: StudentApiResponse): Student {
   return {
     id: apiStudent.id.toString(),
@@ -32,7 +31,6 @@ export function useStudents() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial load of students
   useEffect(() => {
     loadStudents();
   }, []);
@@ -41,7 +39,7 @@ export function useStudents() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getStudents(1, 100); // Load first 100 students
+      const response = await getStudents(1, 100);
       const transformedStudents = response.data.map(transformStudent);
       setStudents(transformedStudents);
     } catch (err) {
@@ -59,7 +57,7 @@ export function useStudents() {
       const payload: CreateStudentPayload = {
         name: student.name,
         email: student.email,
-        password: "password123", // Default password, should be changed by the student
+        password: "password123",
         phone: student.phone,
         classId: student.classId,
       };

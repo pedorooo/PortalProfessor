@@ -48,7 +48,6 @@ export function ToastProvider({
 
       setToasts((prev) => [...prev, newToast]);
 
-      // Auto-remove toast after duration
       if (duration > 0) {
         setTimeout(() => {
           removeToast(id);

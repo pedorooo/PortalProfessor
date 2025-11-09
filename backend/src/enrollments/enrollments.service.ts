@@ -24,7 +24,6 @@ export class EnrollmentsService {
   async createEnrollment(
     dto: CreateEnrollmentDto,
   ): Promise<EnrollmentResponse> {
-    // Verify student exists
     const student = await this.prisma.student.findUnique({
       where: { id: dto.studentId },
       include: { user: true },
@@ -34,7 +33,6 @@ export class EnrollmentsService {
       throw new NotFoundException('Student not found');
     }
 
-    // Verify class exists
     const classRecord = await this.prisma.class.findUnique({
       where: { id: dto.classId },
     });
@@ -43,7 +41,6 @@ export class EnrollmentsService {
       throw new NotFoundException('Class not found');
     }
 
-    // Check if student is already enrolled in this class
     const existingEnrollment = await this.prisma.enrollment.findFirst({
       where: {
         studentId: dto.studentId,
@@ -57,7 +54,6 @@ export class EnrollmentsService {
       );
     }
 
-    // Check if class has available capacity
     const enrollmentCount = await this.prisma.enrollment.count({
       where: { classId: dto.classId, status: 'ACTIVE' },
     });
@@ -95,7 +91,6 @@ export class EnrollmentsService {
     page: number;
     limit: number;
   }> {
-    // Verify student exists
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
     });
@@ -139,7 +134,6 @@ export class EnrollmentsService {
       throw new NotFoundException('Enrollment not found');
     }
 
-    // Delete related grades before deleting enrollment
     await this.prisma.grade.deleteMany({
       where: { enrollmentId },
     });

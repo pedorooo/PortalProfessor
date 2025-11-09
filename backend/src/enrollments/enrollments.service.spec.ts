@@ -176,7 +176,7 @@ describe('EnrollmentsService', () => {
         .spyOn(prisma.class, 'findUnique')
         .mockResolvedValue(mockClass as any);
       jest.spyOn(prisma.enrollment, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.enrollment, 'count').mockResolvedValue(30); // Full
+      jest.spyOn(prisma.enrollment, 'count').mockResolvedValue(30);
 
       await expect(service.createEnrollment(dto)).rejects.toThrow(
         BadRequestException,

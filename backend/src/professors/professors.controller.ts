@@ -25,10 +25,6 @@ import type { DashboardStatsResponse } from './dto/dashboard-stats.dto';
 export class ProfessorsController {
   constructor(private readonly professorsService: ProfessorsService) {}
 
-  /**
-   * Create a new professor
-   * POST /professors
-   */
   @Post()
   async createProfessor(
     @Body(new ZodValidationPipe(CreateProfessorSchema))
@@ -37,10 +33,6 @@ export class ProfessorsController {
     return this.professorsService.createProfessor(dto);
   }
 
-  /**
-   * Get all professors with pagination and search
-   * GET /professors?page=1&limit=10&search=John
-   */
   @Get()
   async getAllProfessors(
     @Pagination() pagination: PaginationParams,
@@ -70,19 +62,11 @@ export class ProfessorsController {
     );
   }
 
-  /**
-   * Get dashboard statistics for all students and classes
-   * GET /professors/dashboard
-   */
   @Get('dashboard')
   async getDashboardStats(): Promise<DashboardStatsResponse> {
     return this.professorsService.getDashboardStats();
   }
 
-  /**
-   * Get a single professor by ID
-   * GET /professors/:professorId
-   */
   @Get(':professorId')
   async getProfessor(
     @Param('professorId', new ParseIdPipe('professorId')) professorId: number,
@@ -90,10 +74,6 @@ export class ProfessorsController {
     return this.professorsService.getProfessorById(professorId);
   }
 
-  /**
-   * Update a professor
-   * PUT /professors/:professorId
-   */
   @Put(':professorId')
   async updateProfessor(
     @Param('professorId', new ParseIdPipe('professorId')) professorId: number,

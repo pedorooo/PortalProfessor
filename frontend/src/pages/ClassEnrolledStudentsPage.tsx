@@ -11,7 +11,6 @@ export default function ClassEnrolledStudentsPage() {
   const { classes } = useClasses();
   const { students: mockStudents } = useClassStudents(classId || "");
 
-  // Find the class by ID
   const classIdNumber = classId ? Number.parseInt(classId, 10) : undefined;
   const classData = classIdNumber
     ? classes.find((cls) => cls.id === classIdNumber)
@@ -29,7 +28,7 @@ export default function ClassEnrolledStudentsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {}
       <div>
         <Button
           variant="ghost"
@@ -46,7 +45,7 @@ export default function ClassEnrolledStudentsPage() {
         </div>
       </div>
 
-      {/* Students List */}
+      {}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Lista de Alunos</h2>

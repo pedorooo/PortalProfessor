@@ -1,7 +1,3 @@
-/**
- * Authentication API
- * Login, register, token refresh, and logout endpoints
- */
 
 import { apiRequest } from "../api-client";
 
@@ -40,9 +36,6 @@ export interface RefreshTokenResponse {
   accessToken: string;
 }
 
-/**
- * Login request
- */
 export async function login(
   email: string,
   password: string
@@ -54,9 +47,6 @@ export async function login(
   });
 }
 
-/**
- * Register request
- */
 export async function register(
   payload: RegisterPayload
 ): Promise<RegisterResponse> {
@@ -67,9 +57,6 @@ export async function register(
   });
 }
 
-/**
- * Refresh token request
- */
 export async function refreshToken(): Promise<RefreshTokenResponse> {
   return apiRequest<RefreshTokenResponse>("/auth/refresh-token", {
     method: "POST",
@@ -77,16 +64,12 @@ export async function refreshToken(): Promise<RefreshTokenResponse> {
   });
 }
 
-/**
- * Logout request
- */
 export async function logout(): Promise<void> {
   try {
     await apiRequest("/auth/logout", {
       method: "POST",
     });
   } catch (error) {
-    // Logout errors are not critical
     console.error("Logout error:", error);
   }
 }

@@ -129,14 +129,14 @@ export default function StudentsPage() {
 
       <Card>
         <CardContent className="pt-6 space-y-6">
-          {/* Error message */}
+          {}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
               <p className="text-sm">{error}</p>
             </div>
           )}
 
-          {/* Search and Filters */}
+          {}
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2>Lista de alunos</h2>
@@ -187,7 +187,7 @@ export default function StudentsPage() {
             </div>
           </div>
 
-          {/* Loading and Empty states */}
+          {}
           {isLoading && students.length === 0 && (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Carregando alunos...</p>

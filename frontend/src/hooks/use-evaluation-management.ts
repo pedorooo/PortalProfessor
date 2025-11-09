@@ -22,7 +22,6 @@ export function useEvaluationManagement(classId: string | undefined) {
     new Map()
   );
 
-  // Fetch evaluations
   const fetchEvaluations = useCallback(async () => {
     try {
       if (!classId) return;
@@ -48,27 +47,22 @@ export function useEvaluationManagement(classId: string | undefined) {
     fetchEvaluations();
   }, [fetchEvaluations]);
 
-  // Calculate total weight
   const totalWeight = evaluations.reduce(
     (sum, e) => sum + (e.gradeWeight || 0),
     0
   );
 
-  // Validate weight
   const validateWeight = useCallback(
     (evaluationId: number, newWeight: number): boolean => {
-      // Validate individual weight
       if (newWeight < 0 || newWeight > 100) {
         toastContext.error("Peso deve estar entre 0 e 100");
         return false;
       }
 
-      // Calculate total weight with other evaluations
       const totalOtherWeight = evaluations
         .filter((e) => e.id !== evaluationId)
         .reduce((sum, e) => sum + (e.gradeWeight || 0), 0);
 
-      // Validate total weight
       if (totalOtherWeight + newWeight > 100) {
         toastContext.error(
           `Peso total não pode ultrapassar 100%. Outras avaliações: ${totalOtherWeight}%, ` +
@@ -84,10 +78,8 @@ export function useEvaluationManagement(classId: string | undefined) {
     [evaluations, toastContext]
   );
 
-  // Handle weight change (immediate UI update)
   const handleWeightChange = useCallback(
     (evaluationId: number, value: string) => {
-      // Store previous weight if not already stored
       const evaluation = evaluations.find((e) => e.id === evaluationId);
       if (evaluation && !previousWeights.has(evaluationId)) {
         setPreviousWeights((prev) =>
@@ -95,7 +87,6 @@ export function useEvaluationManagement(classId: string | undefined) {
         );
       }
 
-      // Update local state immediately for better UX
       const newWeight = Number.parseInt(value) || 0;
       setEvaluations((prev) =>
         prev.map((e) =>
@@ -106,7 +97,6 @@ export function useEvaluationManagement(classId: string | undefined) {
     [evaluations, previousWeights]
   );
 
-  // Handle weight blur (persist to server)
   const handleWeightBlur = useCallback(
     async (evaluationId: number) => {
       const evaluation = evaluations.find((e) => e.id === evaluationId);
@@ -115,9 +105,7 @@ export function useEvaluationManagement(classId: string | undefined) {
       const newWeight = evaluation.gradeWeight || 0;
       const previousWeight = previousWeights.get(evaluationId) || 0;
 
-      // Validate weight
       if (!validateWeight(evaluationId, newWeight)) {
-        // Revert locally
         setEvaluations((prev) =>
           prev.map((e) =>
             e.id === evaluationId ? { ...e, gradeWeight: previousWeight } : e
@@ -137,7 +125,6 @@ export function useEvaluationManagement(classId: string | undefined) {
         const updatedEval = await updateEvaluation(evaluationId, {
           gradeWeight: newWeight,
         });
-        // Update state with server response
         setEvaluations((prev) =>
           prev.map((e) => (e.id === evaluationId ? updatedEval : e))
         );
@@ -148,7 +135,6 @@ export function useEvaluationManagement(classId: string | undefined) {
         const errorMessage =
           error instanceof Error ? error.message : "Erro ao atualizar peso";
         toastContext.error(errorMessage);
-        // Revert on error
         setEvaluations((prev) =>
           prev.map((e) =>
             e.id === evaluationId ? { ...e, gradeWeight: previousWeight } : e
@@ -166,7 +152,6 @@ export function useEvaluationManagement(classId: string | undefined) {
     [evaluations, previousWeights, validateWeight, toastContext]
   );
 
-  // Handle delete evaluation
   const handleDeleteEvaluation = useCallback(
     async (evaluationId: number) => {
       if (
@@ -181,7 +166,6 @@ export function useEvaluationManagement(classId: string | undefined) {
         setDeletingId(evaluationId);
         console.log("Deletando avaliação:", evaluationId);
         await deleteEvaluation(evaluationId);
-        // Remove from state
         setEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
         toastContext.success("Avaliação deletada com sucesso");
         console.log("Avaliação deletada com sucesso");
@@ -197,23 +181,19 @@ export function useEvaluationManagement(classId: string | undefined) {
     [toastContext]
   );
 
-  // Handle create evaluation
   const handleCreateEvaluation = useCallback(
     async (payload: CreateEvaluationPayload) => {
-      // Validate weight
       const newWeight = payload.gradeWeight || 0;
       if (newWeight < 0 || newWeight > 100) {
         toastContext.error("Peso da avaliação deve estar entre 0 e 100");
         return;
       }
 
-      // Calculate total weight with existing evaluations
       const totalExistingWeight = evaluations.reduce(
         (sum, e) => sum + (e.gradeWeight || 0),
         0
       );
 
-      // Validate total weight
       if (totalExistingWeight + newWeight > 100) {
         toastContext.error(
           `Peso total não pode ultrapassar 100%. Peso atual: ${totalExistingWeight}%, ` +

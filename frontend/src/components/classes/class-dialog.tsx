@@ -67,7 +67,6 @@ export function ClassDialog({
     }
 
     if (classData) {
-      // Editing: include the id
       const updatedClassData: Class = {
         id: classData.id,
         name: formData.name,
@@ -79,7 +78,6 @@ export function ClassDialog({
       };
       onSubmit(updatedClassData);
     } else {
-      // Creating new: no id needed
       const newClassData = {
         name: formData.name,
         subject: formData.subject as Class["subject"],

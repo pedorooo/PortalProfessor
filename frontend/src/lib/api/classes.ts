@@ -1,7 +1,3 @@
-/**
- * Classes API
- * CRUD operations for classes and related resources
- */
 
 import { apiRequest } from "../api-client";
 
@@ -47,9 +43,6 @@ export interface UpdateClassPayload {
   professorId?: number;
 }
 
-/**
- * Get all classes with pagination
- */
 export async function getClasses(
   page: number = 1,
   limit: number = 10,
@@ -65,16 +58,10 @@ export async function getClasses(
   return apiRequest<ClassesListResponse>(`/classes?${params.toString()}`);
 }
 
-/**
- * Get a single class by ID
- */
 export async function getClassById(classId: number): Promise<ClassApiResponse> {
   return apiRequest<ClassApiResponse>(`/classes/${classId}`);
 }
 
-/**
- * Create a new class
- */
 export async function createClass(
   payload: CreateClassPayload
 ): Promise<ClassApiResponse> {
@@ -84,9 +71,6 @@ export async function createClass(
   });
 }
 
-/**
- * Update a class
- */
 export async function updateClass(
   classId: number,
   payload: UpdateClassPayload
@@ -97,20 +81,12 @@ export async function updateClass(
   });
 }
 
-/**
- * Delete a class
- */
 export async function deleteClass(classId: number): Promise<void> {
   await apiRequest(`/classes/${classId}`, {
     method: "DELETE",
   });
 }
 
-/**
- * ===========================================
- * Class Students API
- * ===========================================
- */
 
 export interface ClassStudent {
   id: number;
@@ -134,9 +110,6 @@ export interface ClassStudentsResponse {
   };
 }
 
-/**
- * Get all students in a class
- */
 export async function getClassStudents(
   classId: number,
   page: number = 1,

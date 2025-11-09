@@ -1,14 +1,8 @@
-/**
- * Pagination parameters - used by all paginated endpoints
- */
 export interface PaginationParams {
   page: number;
   limit: number;
 }
 
-/**
- * Generic paginated response wrapper
- */
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: {
@@ -21,12 +15,6 @@ export interface PaginatedResponse<T> {
   };
 }
 
-/**
- * Parse and validate pagination query parameters
- * @param page - Page number (default: 1)
- * @param limit - Items per page (default: 10, max: 100)
- * @throws BadRequestException if parameters are invalid
- */
 export function parsePaginationParams(
   page: string = '1',
   limit: string = '10',
@@ -45,13 +33,6 @@ export function parsePaginationParams(
   return { page: pageNum, limit: limitNum };
 }
 
-/**
- * Create a paginated response with metadata
- * @param data - Array of items
- * @param total - Total number of items
- * @param page - Current page
- * @param limit - Items per page
- */
 export function createPaginatedResponse<T>(
   data: T[],
   total: number,

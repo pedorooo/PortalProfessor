@@ -11,7 +11,6 @@ export default function ClassLessonsPage() {
   const { classes } = useClasses();
   const { lessons: mockLessons } = useClassLessons(classId || "");
 
-  // Find the class by ID
   const classIdNumber = classId ? Number.parseInt(classId, 10) : undefined;
   const classData = classIdNumber
     ? classes.find((cls) => cls.id === classIdNumber)
@@ -49,7 +48,7 @@ export default function ClassLessonsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {}
       <div>
         <Button
           variant="ghost"
@@ -66,7 +65,7 @@ export default function ClassLessonsPage() {
         </div>
       </div>
 
-      {/* Stats */}
+      {}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -102,7 +101,7 @@ export default function ClassLessonsPage() {
         </Card>
       </div>
 
-      {/* Lessons List */}
+      {}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Histórico de Aulas</h2>

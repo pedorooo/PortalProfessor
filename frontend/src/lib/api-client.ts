@@ -1,7 +1,3 @@
-/**
- * API Client
- * Core API request handling and re-exports all domain modules
- */
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";

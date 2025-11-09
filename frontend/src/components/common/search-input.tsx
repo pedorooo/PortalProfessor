@@ -9,22 +9,6 @@ interface SearchInputProps {
   debounceDelay?: number;
 }
 
-/**
- * Componente de busca reutilizável
- * Pode ser usado em qualquer página que necessite de busca
- *
- * @example
- * const [search, setSearch] = useState("");
- * const debouncedSearch = useDebounce(search, 300);
- *
- * return (
- *   <SearchInput
- *     value={search}
- *     onChange={setSearch}
- *     placeholder="Buscar turmas..."
- *   />
- * );
- */
 export function SearchInput({
   value,
   onChange,

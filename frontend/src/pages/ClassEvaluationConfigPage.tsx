@@ -52,10 +52,10 @@ export default function ClassEvaluationConfigPage() {
     <div className="space-y-6">
       <ClassEvaluationConfigHeader classId={classId} classData={classData} />
 
-      {/* Weight Status Alert */}
+      {}
       <EvaluationWeightStatus totalWeight={totalWeight} />
 
-      {/* Evaluations Card */}
+      {}
       <ClassEvaluationsCard
         classId={classId}
         evaluations={evaluations}
@@ -68,7 +68,7 @@ export default function ClassEvaluationConfigPage() {
         onCreateEvaluation={handleCreateEvaluation}
       />
 
-      {/* Information Alert */}
+      {}
       <Alert className="border-blue-200 bg-blue-50">
         <p className="text-sm text-blue-900">
           O peso de cada avaliação determina sua contribuição na nota final da

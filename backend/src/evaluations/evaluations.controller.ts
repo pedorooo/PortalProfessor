@@ -26,10 +26,6 @@ import type { EvaluationResponse } from './evaluations.service';
 export class EvaluationsController {
   constructor(private readonly evaluationsService: EvaluationsService) {}
 
-  /**
-   * Create a new evaluation
-   * POST /evaluations
-   */
   @Post()
   async createEvaluation(
     @Body(new ZodValidationPipe(CreateEvaluationSchema))
@@ -38,10 +34,6 @@ export class EvaluationsController {
     return this.evaluationsService.createEvaluation(dto);
   }
 
-  /**
-   * Get all evaluations with pagination and filtering
-   * GET /evaluations?page=1&limit=10&search=exam&classId=1&status=OPEN
-   */
   @Get()
   async getAllEvaluations(
     @Pagination() pagination: PaginationParams,
@@ -77,10 +69,6 @@ export class EvaluationsController {
     );
   }
 
-  /**
-   * Get a single evaluation by ID
-   * GET /evaluations/:evaluationId
-   */
   @Get(':evaluationId')
   async getEvaluation(
     @Param('evaluationId', new ParseIdPipe('evaluationId'))
@@ -89,10 +77,6 @@ export class EvaluationsController {
     return this.evaluationsService.getEvaluationById(evaluationId);
   }
 
-  /**
-   * Update an evaluation
-   * PUT /evaluations/:evaluationId
-   */
   @Put(':evaluationId')
   async updateEvaluation(
     @Param('evaluationId', new ParseIdPipe('evaluationId'))
@@ -103,10 +87,6 @@ export class EvaluationsController {
     return this.evaluationsService.updateEvaluation(evaluationId, dto);
   }
 
-  /**
-   * Delete an evaluation
-   * DELETE /evaluations/:evaluationId
-   */
   @Delete(':evaluationId')
   @HttpCode(204)
   async deleteEvaluation(

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getDashboardStats } from "./professors";
 import * as apiClient from "../api-client";
 
-// Mock the apiRequest function
 vi.mock("../api-client", () => ({
   apiRequest: vi.fn(),
 }));

@@ -1,5 +1,3 @@
-// Example test credentials for your backend
-// These are EXAMPLES - adjust based on your actual backend users
 
 export const TEST_CREDENTIALS = {
   valid: [
@@ -41,7 +39,6 @@ export const TEST_CREDENTIALS = {
   ],
 };
 
-// Expected API responses
 export const API_RESPONSES = {
   login: {
     success: {
@@ -76,7 +73,6 @@ export const API_RESPONSES = {
   },
 };
 
-// JWT structure for testing
 export const MOCK_JWT = {
   header: {
     alg: "HS256",
@@ -88,11 +84,10 @@ export const MOCK_JWT = {
     name: "Professor Demo",
     role: "PROFESSOR",
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+    exp: Math.floor(Date.now() / 1000) + 3600,
   },
 };
 
-// Helper: Create mock JWT for testing
 export function createMockJWT(payload = MOCK_JWT.payload): string {
   const header = btoa(JSON.stringify(MOCK_JWT.header));
   const body = btoa(JSON.stringify(payload));
@@ -100,7 +95,6 @@ export function createMockJWT(payload = MOCK_JWT.payload): string {
   return `${header}.${body}.${signature}`;
 }
 
-// Helper: Parse JWT payload
 export function parseJWT(token: string) {
   const parts = token.split(".");
   if (parts.length !== 3) {
@@ -114,9 +108,7 @@ export function parseJWT(token: string) {
   }
 }
 
-// Testing utilities
 export const testUtils = {
-  // Check if localStorage has required keys
   checkLocalStorage: () => {
     const accessToken = localStorage.getItem("accessToken");
     const user = localStorage.getItem("user");
@@ -129,13 +121,11 @@ export const testUtils = {
     };
   },
 
-  // Clear all auth storage
   clearAuth: () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
   },
 
-  // Mock API login response
   mockLoginResponse: (email: string, password: string) => {
     const isValid = TEST_CREDENTIALS.valid.some(
       (cred) => cred.email === email && cred.password === password
@@ -165,7 +155,6 @@ export const testUtils = {
     };
   },
 
-  // Simulate token expiration soon
   createSoonExpiringToken: (expiresIn = 60000) => {
     const payload = {
       ...MOCK_JWT.payload,
@@ -174,7 +163,6 @@ export const testUtils = {
     return createMockJWT(payload);
   },
 
-  // Simulate expired token
   createExpiredToken: () => {
     const payload = {
       ...MOCK_JWT.payload,

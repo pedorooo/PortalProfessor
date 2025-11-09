@@ -26,10 +26,6 @@ interface AuthRequest extends ExpressRequest {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  /**
-   * GET /users/profile
-   * Obter perfil do usuário logado (requer autenticação)
-   */
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Request() req: AuthRequest) {
@@ -46,10 +42,6 @@ export class UsersController {
     return this.usersService.toPublicProfile(user);
   }
 
-  /**
-   * PUT /users/profile
-   * Atualizar perfil do usuário logado (requer autenticação)
-   */
   @Put('profile')
   @UseGuards(JwtAuthGuard)
   async updateProfile(
@@ -71,10 +63,6 @@ export class UsersController {
     return this.usersService.toPublicProfile(updated);
   }
 
-  /**
-   * GET /users/:userId
-   * Obter dados de um usuário específico (público)
-   */
   @Get(':userId')
   async getUser(@Param('userId') userIdParam: string) {
     const userId = Number.parseInt(userIdParam, 10);

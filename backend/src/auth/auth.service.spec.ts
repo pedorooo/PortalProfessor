@@ -1,4 +1,3 @@
-// Mock native modules that are tricky to spy on directly
 jest.mock('bcrypt', () => ({ compare: jest.fn() }));
 jest.mock('node:crypto', () => {
   const actual = jest.requireActual('node:crypto');
@@ -31,7 +30,6 @@ describe('AuthService (unit)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // instantiate service with mocked deps
     service = new AuthService(mockUsersService, mockPrisma);
   });
 
@@ -76,9 +74,7 @@ describe('AuthService (unit)', () => {
         updatedAt: new Date(),
       } as any;
 
-      // make jwt.sign deterministic
       jest.spyOn(jwt, 'sign').mockReturnValue('signed-access' as any);
-      // make randomBytes deterministic
       (crypto as any).randomBytes.mockImplementation(() =>
         Buffer.from('aa', 'hex'),
       );
@@ -87,13 +83,11 @@ describe('AuthService (unit)', () => {
       const res = await service.login(publicUser);
 
       expect(res.accessToken).toEqual('signed-access');
-      // refreshToken comes from randomBytes -> toString('hex') -> 'aa'
       expect(res.refreshToken).toEqual(
         Buffer.from('aa', 'hex').toString('hex'),
       );
       expect(res.expiresAt).toBeInstanceOf(Date);
 
-      // check prisma called with hashed token
       const expectedHash = createHash('sha256')
         .update(res.refreshToken)
         .digest('hex');
@@ -130,7 +124,6 @@ describe('AuthService (unit)', () => {
         revoked: true,
       });
 
-      // new token deterministic
       (crypto as any).randomBytes.mockImplementation(() =>
         Buffer.from('bb', 'hex'),
       );
@@ -143,13 +136,11 @@ describe('AuthService (unit)', () => {
         Buffer.from('bb', 'hex').toString('hex'),
       );
 
-      // old token revoked
       expect(mockPrisma.refreshToken.update).toHaveBeenCalledWith({
         where: { id: tokenRecord.id },
         data: { revoked: true },
       });
 
-      // new token stored with correct hash
       const expectedNewHash = createHash('sha256')
         .update(out.refreshToken)
         .digest('hex');

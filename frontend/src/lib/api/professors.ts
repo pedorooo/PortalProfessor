@@ -8,9 +8,6 @@ export interface DashboardStats {
   enrollmentTrend: { month: string; students: number }[];
 }
 
-/**
- * Get dashboard statistics for all students and classes in the system
- */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   return apiRequest<DashboardStats>("/professors/dashboard");
 };

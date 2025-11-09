@@ -22,17 +22,12 @@ export class ProfessorsService {
     private readonly usersService: UsersService,
   ) {}
 
-  /**
-   * Create a new professor
-   */
   async createProfessor(dto: CreateProfessorDto): Promise<ProfessorResponse> {
-    // Check if email already exists
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
 
-    // Create user and professor records
     const user = await this.prisma.user.create({
       data: {
         email: dto.email.toLowerCase(),
@@ -52,9 +47,6 @@ export class ProfessorsService {
     return this.formatProfessorResponse(professor);
   }
 
-  /**
-   * Get all professors with pagination and optional filtering
-   */
   async getAllProfessors(
     page: number = 1,
     limit: number = 10,
@@ -95,9 +87,6 @@ export class ProfessorsService {
     };
   }
 
-  /**
-   * Get a single professor by ID
-   */
   async getProfessorById(professorId: number): Promise<ProfessorResponse> {
     const professor = await this.prisma.professor.findUnique({
       where: { id: professorId },
@@ -111,9 +100,6 @@ export class ProfessorsService {
     return this.formatProfessorResponse(professor);
   }
 
-  /**
-   * Get professor by userId
-   */
   async getProfessorByUserId(userId: number): Promise<ProfessorResponse> {
     const professor = await this.prisma.professor.findUnique({
       where: { userId },
@@ -127,9 +113,6 @@ export class ProfessorsService {
     return this.formatProfessorResponse(professor);
   }
 
-  /**
-   * Update a professor
-   */
   async updateProfessor(
     professorId: number,
     dto: UpdateProfessorDto,
@@ -143,13 +126,11 @@ export class ProfessorsService {
       throw new BadRequestException('Professor not found');
     }
 
-    // Update user fields
     const updateUserData: any = {};
     if (dto.name !== undefined) {
       updateUserData.name = dto.name;
     }
 
-    // Update records
     if (Object.keys(updateUserData).length > 0) {
       await this.prisma.user.update({
         where: { id: professor.userId },
@@ -157,7 +138,6 @@ export class ProfessorsService {
       });
     }
 
-    // Fetch updated records
     const updatedProfessor = await this.prisma.professor.findUnique({
       where: { id: professorId },
       include: { user: true },
@@ -166,17 +146,11 @@ export class ProfessorsService {
     return this.formatProfessorResponse(updatedProfessor!);
   }
 
-  /**
-   * Get dashboard statistics for all students and classes in the system
-   */
   async getDashboardStats(): Promise<DashboardStatsResponse> {
-    // Get total number of students in the system
     const totalStudents = await this.prisma.student.count();
 
-    // Get total number of classes in the system
     const totalClasses = await this.prisma.class.count();
 
-    // Get upcoming evaluations (next 30 days) across all classes
     const now = new Date();
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(now.getDate() + 30);
@@ -190,7 +164,6 @@ export class ProfessorsService {
       },
     });
 
-    // Get average student score across all evaluation submissions
     const evaluations = await this.prisma.evaluation.findMany({
       select: {
         id: true,
@@ -212,7 +185,6 @@ export class ProfessorsService {
     }
     const avgStudentScore = gradeCount > 0 ? totalGrades / gradeCount : 0;
 
-    // Get enrollment trend for last 6 months across all classes
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(now.getMonth() - 6);
 
@@ -224,7 +196,6 @@ export class ProfessorsService {
       orderBy: { enrolledAt: 'asc' },
     });
 
-    // Group enrollments by month
     const enrollmentsByMonth = new Map<string, number>();
     for (let i = 5; i >= 0; i--) {
       const date = new Date();
@@ -259,9 +230,6 @@ export class ProfessorsService {
     };
   }
 
-  /**
-   * Helper method to format professor response
-   */
   private formatProfessorResponse(professor: any): ProfessorResponse {
     return {
       id: professor.id,
@@ -272,9 +240,6 @@ export class ProfessorsService {
     };
   }
 
-  /**
-   * Hash password
-   */
   private async hashPassword(password: string): Promise<string> {
     return hash(password, 10);
   }

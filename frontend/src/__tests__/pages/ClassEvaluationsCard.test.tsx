@@ -3,7 +3,6 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ClassEvaluationsCard } from "@/pages/components/ClassEvaluationsCard";
 import type { ClassEvaluation } from "@/lib/api-client";
 
-// Mock the toast context
 const mockToast = {
   success: vi.fn(),
   error: vi.fn(),
@@ -15,7 +14,6 @@ vi.mock("@/context/ToastContext", () => ({
   useToast: () => mockToast,
 }));
 
-// Mock the EvaluationForm component
 vi.mock("@/pages/components/EvaluationForm", () => ({
   EvaluationForm: ({
     isOpen,
@@ -46,7 +44,6 @@ vi.mock("@/pages/components/EvaluationForm", () => ({
   ),
 }));
 
-// Mock the EvaluationList component
 vi.mock("@/pages/components/EvaluationList", () => ({
   EvaluationList: ({ evaluations, updatingId, deletingId }: any) => (
     <div data-testid="evaluation-list">
@@ -127,11 +124,9 @@ describe("ClassEvaluationsCard", () => {
   it("deve fechar o formulário quando cancelar é clicado", () => {
     render(<ClassEvaluationsCard {...mockProps} />);
 
-    // Abrir formulário
     const newEvalButton = screen.getByText("+ Nova Avaliação");
     fireEvent.click(newEvalButton);
 
-    // Cancelar
     const cancelButton = screen.getByText("Cancel");
     fireEvent.click(cancelButton);
 
@@ -186,16 +181,13 @@ describe("ClassEvaluationsCard", () => {
 
     render(<ClassEvaluationsCard {...propsWithMock} />);
 
-    // Abrir formulário
     const newEvalButton = screen.getByText("+ Nova Avaliação");
     fireEvent.click(newEvalButton);
 
-    // Preencher formulário
     fireEvent.click(screen.getByText("Change Name"));
     fireEvent.click(screen.getByText("Change Date"));
     fireEvent.click(screen.getByText("Change Weight"));
 
-    // Submeter
     fireEvent.click(screen.getByText("Submit"));
 
     await waitFor(() => {
@@ -216,11 +208,9 @@ describe("ClassEvaluationsCard", () => {
   it("deve mostrar erro quando o nome da avaliação está vazio", async () => {
     render(<ClassEvaluationsCard {...mockProps} />);
 
-    // Abrir formulário
     const newEvalButton = screen.getByText("+ Nova Avaliação");
     fireEvent.click(newEvalButton);
 
-    // Tentar submeter sem nome
     fireEvent.click(screen.getByText("Submit"));
 
     expect(mockToast.error).toHaveBeenCalledWith(
@@ -231,14 +221,11 @@ describe("ClassEvaluationsCard", () => {
   it("deve mostrar erro quando a data está vazia", async () => {
     render(<ClassEvaluationsCard {...mockProps} />);
 
-    // Abrir formulário
     const newEvalButton = screen.getByText("+ Nova Avaliação");
     fireEvent.click(newEvalButton);
 
-    // Preencher nome mas não data
     fireEvent.click(screen.getByText("Change Name"));
 
-    // Tentar submeter
     fireEvent.click(screen.getByText("Submit"));
 
     expect(mockToast.error).toHaveBeenCalledWith(
@@ -257,16 +244,13 @@ describe("ClassEvaluationsCard", () => {
 
     render(<ClassEvaluationsCard {...propsWithMock} />);
 
-    // Abrir formulário
     const newEvalButton = screen.getByText("+ Nova Avaliação");
     fireEvent.click(newEvalButton);
 
-    // Preencher formulário
     fireEvent.click(screen.getByText("Change Name"));
     fireEvent.click(screen.getByText("Change Date"));
     fireEvent.click(screen.getByText("Change Weight"));
 
-    // Submeter
     fireEvent.click(screen.getByText("Submit"));
 
     await waitFor(() => {
@@ -287,22 +271,17 @@ describe("ClassEvaluationsCard", () => {
 
     render(<ClassEvaluationsCard {...propsWithMock} />);
 
-    // Abrir formulário
     const newEvalButton = screen.getByText("+ Nova Avaliação");
     fireEvent.click(newEvalButton);
 
-    // Preencher formulário
     fireEvent.click(screen.getByText("Change Name"));
     fireEvent.click(screen.getByText("Change Date"));
     fireEvent.click(screen.getByText("Change Weight"));
 
-    // Submeter
     fireEvent.click(screen.getByText("Submit"));
 
-    // Verificar estado de carregamento
     expect(screen.getByText("Loading: true")).toBeInTheDocument();
 
-    // Aguardar conclusão
     await waitFor(() => {
       expect(screen.getByText("Loading: false")).toBeInTheDocument();
     });

@@ -27,10 +27,6 @@ import type { ClassResponse } from './classes.service';
 export class ClassesController {
   constructor(private readonly classesService: ClassesService) {}
 
-  /**
-   * Get all classes with pagination and filtering
-   * GET /classes?page=1&limit=10&search=Math&professorId=1&subject=Matemática
-   */
   @Get()
   async getAllClasses(
     @Pagination() pagination: PaginationParams,
@@ -64,10 +60,6 @@ export class ClassesController {
     );
   }
 
-  /**
-   * Get a single class by ID
-   * GET /classes/:classId
-   */
   @Get(':classId')
   async getClass(
     @Param('classId', ParseIntPipe) classId: number,
@@ -79,10 +71,6 @@ export class ClassesController {
     return this.classesService.getClassById(classId);
   }
 
-  /**
-   * Create a new class
-   * POST /classes
-   */
   @Post()
   async createClass(
     @Body(new ZodValidationPipe(CreateClassSchema))
@@ -91,10 +79,6 @@ export class ClassesController {
     return this.classesService.createClass(dto);
   }
 
-  /**
-   * Update a class
-   * PUT /classes/:classId
-   */
   @Put(':classId')
   async updateClass(
     @Param('classId', ParseIntPipe) classId: number,
@@ -108,10 +92,6 @@ export class ClassesController {
     return this.classesService.updateClass(classId, dto);
   }
 
-  /**
-   * Delete a class
-   * DELETE /classes/:classId
-   */
   @Delete(':classId')
   async deleteClass(
     @Param('classId', ParseIntPipe) classId: number,
@@ -124,10 +104,6 @@ export class ClassesController {
     return { message: 'Class deleted successfully' };
   }
 
-  /**
-   * Get all students enrolled in a class
-   * GET /classes/:classId/students?page=1&limit=10
-   */
   @Get(':classId/students')
   async getClassStudents(
     @Param('classId', ParseIntPipe) classId: number,
@@ -157,10 +133,6 @@ export class ClassesController {
     );
   }
 
-  /**
-   * Get all evaluations for a class
-   * GET /classes/:classId/evaluations?page=1&limit=10&search=exam&status=OPEN
-   */
   @Get(':classId/evaluations')
   async getClassEvaluations(
     @Param('classId', ParseIntPipe) classId: number,

@@ -57,12 +57,11 @@ export function StudentDialog({
     enrollmentDate: new Date().toISOString().split("T")[0],
   });
 
-  // Load classes from API
   useEffect(() => {
     const loadClasses = async () => {
       setLoadingClasses(true);
       try {
-        const response = await getClasses(1, 100); // Get first 100 classes
+        const response = await getClasses(1, 100);
         setClasses(response.data);
       } catch (error) {
         console.error("Error loading classes:", error);
@@ -83,7 +82,7 @@ export function StudentDialog({
         email: student.email,
         phone: student.phone,
         class: student.class,
-        classId: undefined, // Will be set from API if needed
+        classId: undefined,
         status: student.status,
         enrollmentDate: student.enrollmentDate,
       });

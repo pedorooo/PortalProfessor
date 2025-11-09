@@ -22,10 +22,6 @@ import type { PaginationParams } from '../common/utils/pagination.util';
 export class EnrollmentsController {
   constructor(private readonly enrollmentsService: EnrollmentsService) {}
 
-  /**
-   * Enroll a student in a class
-   * POST /enrollments
-   */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createEnrollment(@Body() body: unknown): Promise<{ data: unknown }> {
@@ -34,10 +30,6 @@ export class EnrollmentsController {
     return { data };
   }
 
-  /**
-   * Get all enrollments of a student
-   * GET /enrollments/student/:studentId?page=1&limit=10
-   */
   @Get('student/:studentId')
   async getStudentEnrollments(
     @Param('studentId', ParseIntPipe) studentId: number,
@@ -67,10 +59,6 @@ export class EnrollmentsController {
     );
   }
 
-  /**
-   * Remove a student enrollment
-   * DELETE /enrollments/:enrollmentId
-   */
   @Delete(':enrollmentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteEnrollment(

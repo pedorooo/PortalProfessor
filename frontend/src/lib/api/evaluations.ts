@@ -1,7 +1,3 @@
-/**
- * Evaluations API
- * CRUD operations for evaluations
- */
 
 import { apiRequest } from "../api-client";
 import { formatDateFields } from "@/lib/utils/date";
@@ -41,9 +37,6 @@ export interface CreateEvaluationPayload {
   status?: "OPEN" | "CLOSED";
 }
 
-/**
- * Get all evaluations in a class
- */
 export async function getClassEvaluations(
   classId: number,
   page: number = 1,
@@ -66,9 +59,6 @@ export async function getClassEvaluations(
   return response;
 }
 
-/**
- * Create a new evaluation
- */
 export async function createEvaluation(
   payload: CreateEvaluationPayload
 ): Promise<ClassEvaluation> {
@@ -78,9 +68,6 @@ export async function createEvaluation(
   });
 }
 
-/**
- * Update an evaluation
- */
 export async function updateEvaluation(
   evaluationId: number,
   payload: UpdateEvaluationPayload
@@ -91,9 +78,6 @@ export async function updateEvaluation(
   });
 }
 
-/**
- * Delete an evaluation
- */
 export async function deleteEvaluation(evaluationId: number): Promise<void> {
   return apiRequest<void>(`/evaluations/${evaluationId}`, {
     method: "DELETE",

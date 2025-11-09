@@ -6,10 +6,6 @@ import {
 import { parsePaginationParams } from '../utils/pagination.util';
 import type { PaginationParams } from '../utils/pagination.util';
 
-/**
- * Decorator to automatically parse and validate pagination parameters
- * Usage: @Pagination() pagination: PaginationParams
- */
 export const Pagination = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): PaginationParams => {
     const request = ctx.switchToHttp().getRequest();

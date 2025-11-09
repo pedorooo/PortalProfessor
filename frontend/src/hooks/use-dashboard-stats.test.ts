@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useDashboardStats } from "./use-dashboard-stats";
 import * as apiClient from "@/lib/api-client";
 
-// Mock the API client
 vi.mock("@/lib/api-client", () => ({
   getDashboardStats: vi.fn(),
 }));
@@ -26,7 +25,6 @@ describe("useDashboardStats", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Suppress console.error for expected errors in tests
     vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
@@ -41,17 +39,14 @@ describe("useDashboardStats", () => {
 
     const { result } = renderHook(() => useDashboardStats());
 
-    // Initially loading
     expect(result.current.isLoading).toBe(true);
     expect(result.current.stats).toBeNull();
     expect(result.current.error).toBeNull();
 
-    // Wait for the hook to finish loading
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // Should have stats
     expect(result.current.stats).toEqual(mockDashboardStats);
     expect(result.current.error).toBeNull();
     expect(apiClient.getDashboardStats).toHaveBeenCalledTimes(1);
@@ -65,15 +60,12 @@ describe("useDashboardStats", () => {
 
     const { result } = renderHook(() => useDashboardStats());
 
-    // Initially loading
     expect(result.current.isLoading).toBe(true);
 
-    // Wait for the hook to finish loading
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // Should have error
     expect(result.current.stats).toBeNull();
     expect(result.current.error).toBe(errorMessage);
   });
@@ -167,10 +159,8 @@ describe("useDashboardStats", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // Rerender the hook
     rerender();
 
-    // Should still only have called the API once
     expect(apiClient.getDashboardStats).toHaveBeenCalledTimes(1);
   });
 });

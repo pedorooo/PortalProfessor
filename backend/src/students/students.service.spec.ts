@@ -7,7 +7,6 @@ import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
 
-// Mock data
 const mockUser = {
   id: 1,
   email: 'student@example.com',
@@ -31,7 +30,6 @@ describe('StudentsService', () => {
   let usersService: UsersService;
 
   beforeEach(async () => {
-    // Mock bcrypt.hash
     (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashedpassword');
 
     const module: TestingModule = await Test.createTestingModule({

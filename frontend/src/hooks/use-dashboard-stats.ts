@@ -20,7 +20,6 @@ export function useDashboardStats() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch dashboard stats - shows all students and classes in the system
         const dashboardStats = await getDashboardStats();
 
         setStats(dashboardStats);

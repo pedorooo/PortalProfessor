@@ -17,12 +17,11 @@ export function useClasses(params?: UseClassesParams) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [limit] = useState(100); // Fetch all at once
+  const [limit] = useState(100);
 
   const searchTerm = params?.searchTerm || "";
   const subject = params?.subject;
 
-  // Fetch classes with search and filters from database
   useEffect(() => {
     const fetchClasses = async () => {
       try {
@@ -35,7 +34,6 @@ export function useClasses(params?: UseClassesParams) {
           subject && subject !== "all" ? subject : undefined
         );
 
-        // Transform API response to frontend Class type
         const transformedClasses: Class[] = response.data.map((apiClass) => ({
           id: apiClass.id,
           name: apiClass.name,
@@ -66,17 +64,14 @@ export function useClasses(params?: UseClassesParams) {
       setIsLoading(true);
       setError(null);
 
-      // Get current user ID from localStorage
       const userStr = localStorage.getItem("user");
       if (!userStr) throw new Error("User not authenticated");
       const user = JSON.parse(userStr);
 
-      // Validate that subject is provided
       if (!classData.subject) {
         throw new Error("Subject is required");
       }
 
-      // Convert user.id to number if it's a string
       const professorId =
         typeof user.id === "string" ? Number.parseInt(user.id, 10) : user.id;
 
@@ -88,7 +83,6 @@ export function useClasses(params?: UseClassesParams) {
         professorId,
       });
 
-      // Transform and add to local state
       const newClass: Class = {
         id: response.id,
         name: response.name,
@@ -122,10 +116,8 @@ export function useClasses(params?: UseClassesParams) {
           subject: updates.subject,
           description: updates.description,
           maxCapacity: updates.maxCapacity,
-          // professorId can be updated if needed
         });
 
-        // Transform and update local state
         const updatedClass: Class = {
           id: response.id,
           name: response.name,

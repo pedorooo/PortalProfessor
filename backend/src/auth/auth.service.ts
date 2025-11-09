@@ -54,11 +54,9 @@ export class AuthService {
       signOpts,
     );
 
-    // create a random refresh token, store its hash in DB and return raw token to client
     const refreshToken = randomBytes(48).toString('hex');
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
 
-    // compute expiresAt from refreshOpts.expiresIn (support seconds 's', hours 'h', days 'd')
     const expiresInRaw = jwtRefreshExpires;
     const expiresMs = parseExpiresToMs(expiresInRaw);
     const expiresAt = new Date(Date.now() + expiresMs);
@@ -88,7 +86,6 @@ export class AuthService {
 
   async refreshToken(token: string) {
     try {
-      // verify incoming refresh token by hash lookup
       const tokenHash = createHash('sha256').update(token).digest('hex');
       const tokenRec = await this.prisma.refreshToken.findUnique({
         where: { tokenHash },
@@ -99,7 +96,6 @@ export class AuthService {
       const user = await this.usersService.findById(tokenRec.userId);
       if (!user) throw new UnauthorizedException();
 
-      // rotate refresh token: mark old revoked and create a new one
       await this.prisma.refreshToken.update({
         where: { id: tokenRec.id },
         data: { revoked: true },
@@ -128,8 +124,6 @@ export class AuthService {
       );
       return { accessToken: access, refreshToken: newRefreshToken, expiresAt };
     } catch (err) {
-      // log the error for debugging, then return unauthorized
-      // eslint-disable-next-line no-console
       console.error(err);
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -150,7 +144,6 @@ export class AuthService {
 }
 
 function parseExpiresToMs(value: string) {
-  // supports formats like '3600s', '1h', '7d' or numeric seconds
   if (!value) return 7 * 24 * 3600 * 1000;
   const v = value.toString().trim();
   const last = v.at(-1) ?? '';

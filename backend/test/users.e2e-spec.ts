@@ -65,7 +65,6 @@ describe('Users Endpoints (e2e)', () => {
       expect(response.body).toHaveProperty('email', 'profile-test@example.com');
       expect(response.body).toHaveProperty('name', 'Profile Test User');
       expect(response.body).toHaveProperty('role');
-      // Should NOT include passwordHash
       expect(response.body).not.toHaveProperty('passwordHash');
     });
 
@@ -105,7 +104,6 @@ describe('Users Endpoints (e2e)', () => {
       expect(response.body).toHaveProperty('id', userId);
       expect(response.body).toHaveProperty('name', 'Updated Name');
       expect(response.body).toHaveProperty('email', 'profile-test@example.com');
-      // Should NOT include passwordHash
       expect(response.body).not.toHaveProperty('passwordHash');
     });
 
@@ -164,7 +162,6 @@ describe('Users Endpoints (e2e)', () => {
       expect(response.body).toHaveProperty('email', 'profile-test@example.com');
       expect(response.body).toHaveProperty('name', 'Updated Name');
       expect(response.body).toHaveProperty('role');
-      // Should NOT include passwordHash
       expect(response.body).not.toHaveProperty('passwordHash');
     });
 

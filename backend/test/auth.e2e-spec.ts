@@ -37,14 +37,12 @@ describe('Auth Endpoints (e2e)', () => {
     });
 
     it('should reject duplicate email', async () => {
-      // Register first user
       await request(app.getHttpServer()).post('/auth/register').send({
         email: 'duplicate@example.com',
         password: 'Pass123!',
         name: 'User One',
       });
 
-      // Try to register with same email
       const res = await request(app.getHttpServer())
         .post('/auth/register')
         .send({
@@ -77,7 +75,6 @@ describe('Auth Endpoints (e2e)', () => {
       testUserEmail = 'login-test@example.com';
       testUserPassword = 'LoginTestPass123!';
 
-      // Create test user for login tests
       await request(app.getHttpServer()).post('/auth/register').send({
         email: testUserEmail,
         password: testUserPassword,
@@ -95,7 +92,6 @@ describe('Auth Endpoints (e2e)', () => {
       expect(res.body).toHaveProperty('accessToken');
       expect(res.body.accessToken).toBeTruthy();
 
-      // Check for Set-Cookie header (refresh token)
       expect(res.headers['set-cookie']).toBeDefined();
       expect(res.headers['set-cookie']).toEqual(
         expect.arrayContaining([expect.stringContaining('refreshToken=')]),
@@ -139,7 +135,6 @@ describe('Auth Endpoints (e2e)', () => {
         .post('/auth/refresh-token')
         .set('Cookie', ['refreshToken=invalid-token-here']);
 
-      // Can be either 400 (missing token) or 401 (invalid token)
       expect([400, 401]).toContain(res.status);
       expect(res.body).toHaveProperty('message');
     });
@@ -159,7 +154,6 @@ describe('Auth Endpoints (e2e)', () => {
       const flowUserEmail = `flow-${Date.now()}@example.com`;
       const flowUserPassword = 'FlowPass123!';
 
-      // 1. Register
       const registerRes = await request(app.getHttpServer())
         .post('/auth/register')
         .send({
@@ -170,7 +164,6 @@ describe('Auth Endpoints (e2e)', () => {
       expect(registerRes.status).toBe(201);
       expect(registerRes.body).toHaveProperty('status', 'ok');
 
-      // 2. Login - should return access token and set refresh cookie
       const loginRes = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
@@ -183,7 +176,6 @@ describe('Auth Endpoints (e2e)', () => {
       expect(loginRes.headers['set-cookie']).toBeDefined();
       expect(loginRes.headers['set-cookie'][0]).toContain('refreshToken=');
 
-      // 3. Logout
       const logoutRes = await request(app.getHttpServer()).post('/auth/logout');
       expect(logoutRes.status).toBe(201);
       expect(logoutRes.body).toHaveProperty('status', 'ok');

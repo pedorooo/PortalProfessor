@@ -21,10 +21,8 @@ export default function ClassesPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [classToDelete, setClassToDelete] = useState<Class | null>(null);
 
-  // Debounce search term for API calls (300ms delay)
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Fetch classes with debounced search and subject filter from database
   const { classes, isLoading, addClass, updateClass, deleteClass } = useClasses(
     {
       searchTerm: debouncedSearchTerm,
@@ -32,7 +30,6 @@ export default function ClassesPage() {
     }
   );
 
-  // Dialog handlers
   const handleDialogOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
     if (!open) {
@@ -44,7 +41,6 @@ export default function ClassesPage() {
     handleDialogOpenChange(true);
   };
 
-  // CRUD handlers
   const handleAddClass = async (classData: Omit<Class, "id">) => {
     try {
       await addClass(classData);

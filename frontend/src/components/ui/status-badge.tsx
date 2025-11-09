@@ -5,9 +5,6 @@ interface StatusBadgeProps {
   readonly className?: string;
 }
 
-/**
- * Reusable status badge component
- */
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
   return (
     <span

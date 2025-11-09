@@ -9,7 +9,6 @@ export interface ClassStudent {
   phone: string | null;
   status: string;
   enrolledAt: string;
-  // Mock fields for UI display
   grade?: number;
   attendance?: number;
   performance?: number;

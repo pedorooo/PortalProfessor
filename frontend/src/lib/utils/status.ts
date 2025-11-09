@@ -1,6 +1,3 @@
-/**
- * Status utility functions for evaluations and other entities
- */
 
 export type StatusType =
   | "OPEN"
@@ -14,9 +11,6 @@ interface StatusStyle {
   text: string;
 }
 
-/**
- * Get Tailwind CSS classes for status styling
- */
 export function getStatusStyle(status: string): string {
   const statusMap: Record<string, StatusStyle> = {
     "em andamento": { bg: "bg-blue-100", text: "text-blue-800" },
@@ -34,9 +28,6 @@ export function getStatusStyle(status: string): string {
   return `${style.bg} ${style.text}`;
 }
 
-/**
- * Get localized status label
- */
 export function getStatusLabel(status: string): string {
   const labelMap: Record<string, string> = {
     OPEN: "em andamento",

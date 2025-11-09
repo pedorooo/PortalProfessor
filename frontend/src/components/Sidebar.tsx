@@ -32,12 +32,6 @@ export default function Sidebar({ open, onOpenChange }: SidebarProps) {
       icon: BookOpen,
       disabled: false,
     },
-    // {
-    //   href: "/dashboard/evaluation-criteria",
-    //   label: "Evaluation Criteria",
-    //   icon: BookMarked,
-    // },
-    // { href: "#", label: "Settings", icon: Settings, disabled: true },
   ];
 
   const isActive = (href: string) => {

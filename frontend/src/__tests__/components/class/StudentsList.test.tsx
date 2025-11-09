@@ -105,13 +105,10 @@ describe("StudentsList", () => {
   it("deve aplicar classes de estilo corretas aos cards", () => {
     render(<StudentsList students={mockStudents} />);
 
-    // Verifica se cada aluno tem um card renderizado
-    // pelo menos verificando se os nomes estão presentes
     for (const student of mockStudents) {
       const nameElement = screen.getByText(student.name);
       expect(nameElement).toBeInTheDocument();
 
-      // Verifica se está dentro de um elemento com as classes apropriadas
       const cardDiv = nameElement.closest("div.flex");
       expect(cardDiv).toHaveClass("items-start");
       expect(cardDiv).toHaveClass("justify-between");

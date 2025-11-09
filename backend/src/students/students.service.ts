@@ -30,17 +30,12 @@ export class StudentsService {
     private readonly usersService: UsersService,
   ) {}
 
-  /**
-   * Create a new student
-   */
   async createStudent(dto: CreateStudentDto): Promise<StudentListResponse> {
-    // Check if email already exists
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
 
-    // If classId is provided, verify the class exists
     if (dto.classId) {
       const classExists = await this.prisma.class.findUnique({
         where: { id: dto.classId },
@@ -50,7 +45,6 @@ export class StudentsService {
       }
     }
 
-    // Create user and student records
     const user = await this.prisma.user.create({
       data: {
         email: dto.email.toLowerCase(),
@@ -67,7 +61,6 @@ export class StudentsService {
       },
     });
 
-    // Create enrollment if classId is provided
     let className: string | undefined;
     let classId: number | undefined;
 
@@ -95,9 +88,6 @@ export class StudentsService {
     };
   }
 
-  /**
-   * Get all students with pagination and filtering
-   */
   async getAllStudents(
     page: number = 1,
     limit: number = 10,
@@ -113,7 +103,6 @@ export class StudentsService {
   }> {
     const skip = (page - 1) * limit;
 
-    // Build where clause for filtering
     const whereClause: any = {};
 
     if (search) {
@@ -126,7 +115,6 @@ export class StudentsService {
     }
 
     if (status && status !== 'ALL') {
-      // Filter by enrollment status if classId is provided
       if (classId) {
         const enrollments = await this.prisma.enrollment.findMany({
           where: {
@@ -145,10 +133,8 @@ export class StudentsService {
       };
     }
 
-    // Get total count
     const total = await this.prisma.student.count({ where: whereClause });
 
-    // Get students with pagination
     const students = await this.prisma.student.findMany({
       where: whereClause,
       include: {
@@ -178,7 +164,6 @@ export class StudentsService {
           className = latestEnrollment.class.name;
           classId = latestEnrollment.class.id;
 
-          // Calculate the average grade for this student in this class
           const evaluationSubmissions =
             await this.prisma.evaluationSubmission.findMany({
               where: {
@@ -223,9 +208,6 @@ export class StudentsService {
     };
   }
 
-  /**
-   * Get a single student by ID
-   */
   async getStudentById(studentId: number): Promise<StudentListResponse> {
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
@@ -255,7 +237,6 @@ export class StudentsService {
       className = latestEnrollment.class.name;
       classId = latestEnrollment.class.id;
 
-      // Calculate the average grade for this student in this class
       const evaluationSubmissions =
         await this.prisma.evaluationSubmission.findMany({
           where: {
@@ -290,9 +271,6 @@ export class StudentsService {
     };
   }
 
-  /**
-   * Update a student
-   */
   async updateStudent(
     studentId: number,
     dto: UpdateStudentDto,
@@ -306,7 +284,6 @@ export class StudentsService {
       throw new BadRequestException('Student not found');
     }
 
-    // Update user fields
     const updateUserData: any = {};
     if (dto.name !== undefined) {
       updateUserData.name = dto.name;
@@ -317,7 +294,6 @@ export class StudentsService {
       updateStudentData.phone = dto.phone;
     }
 
-    // Update records
     if (Object.keys(updateUserData).length > 0) {
       await this.prisma.user.update({
         where: { id: student.userId },
@@ -332,7 +308,6 @@ export class StudentsService {
       });
     }
 
-    // Fetch updated records with enrollments
     const updatedStudent = await this.prisma.student.findUnique({
       where: { id: studentId },
       include: {
@@ -357,7 +332,6 @@ export class StudentsService {
       className = latestEnrollment.class.name;
       classId = latestEnrollment.class.id;
 
-      // Calculate the average grade for this student in this class
       const evaluationSubmissions =
         await this.prisma.evaluationSubmission.findMany({
           where: {
@@ -392,9 +366,6 @@ export class StudentsService {
     };
   }
 
-  /**
-   * Delete a student
-   */
   async deleteStudent(studentId: number): Promise<void> {
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
@@ -405,7 +376,6 @@ export class StudentsService {
       throw new BadRequestException('Student not found');
     }
 
-    // Delete related records first
     await this.prisma.studentLesson.deleteMany({
       where: { studentId },
     });
@@ -418,20 +388,15 @@ export class StudentsService {
       where: { studentId },
     });
 
-    // Delete student record
     await this.prisma.student.delete({
       where: { id: studentId },
     });
 
-    // Delete user record
     await this.prisma.user.delete({
       where: { id: student.userId },
     });
   }
 
-  /**
-   * Get students by class with enrollment status
-   */
   async getStudentsByClass(classId: number): Promise<StudentListResponse[]> {
     const enrollments = await this.prisma.enrollment.findMany({
       where: { classId },
@@ -449,13 +414,10 @@ export class StudentsService {
         enrollment.student.user,
       ),
       status: enrollment.status,
-      className: '', // Will be populated by the controller if needed
+      className: '',
     }));
   }
 
-  /**
-   * Helper method to format student response
-   */
   private formatStudentResponse(student: any, user: any): StudentResponse {
     return {
       id: student.id,
@@ -469,9 +431,6 @@ export class StudentsService {
     };
   }
 
-  /**
-   * Hash password - delegated to UsersService
-   */
   private async hashPassword(password: string): Promise<string> {
     return hash(password, 10);
   }

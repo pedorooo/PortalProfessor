@@ -26,10 +26,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  /**
-   * Get all students with pagination and filtering
-   * GET /students?page=1&limit=10&search=John&status=ACTIVE&classId=1
-   */
   @Get()
   async getAllStudents(
     @Pagination() pagination: PaginationParams,
@@ -72,10 +68,6 @@ export class StudentsController {
     );
   }
 
-  /**
-   * Get a single student by ID
-   * GET /students/:studentId
-   */
   @Get(':studentId')
   async getStudent(
     @Param('studentId', ParseIntPipe) studentId: number,
@@ -87,10 +79,6 @@ export class StudentsController {
     return this.studentsService.getStudentById(studentId);
   }
 
-  /**
-   * Create a new student
-   * POST /students
-   */
   @Post()
   async createStudent(
     @Body(new ZodValidationPipe(CreateStudentSchema))
@@ -99,10 +87,6 @@ export class StudentsController {
     return this.studentsService.createStudent(dto);
   }
 
-  /**
-   * Update a student
-   * PUT /students/:studentId
-   */
   @Put(':studentId')
   async updateStudent(
     @Param('studentId', ParseIntPipe) studentId: number,
@@ -116,10 +100,6 @@ export class StudentsController {
     return this.studentsService.updateStudent(studentId, dto);
   }
 
-  /**
-   * Delete a student
-   * DELETE /students/:studentId
-   */
   @Delete(':studentId')
   async deleteStudent(
     @Param('studentId', ParseIntPipe) studentId: number,

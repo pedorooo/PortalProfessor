@@ -249,19 +249,17 @@ describe('ProfessorsService', () => {
 
   describe('getDashboardStats', () => {
     it('should return dashboard statistics for all students and classes', async () => {
-      // Mock counts
       jest.spyOn(prisma.student, 'count').mockResolvedValue(50);
       jest.spyOn(prisma.class, 'count').mockResolvedValue(10);
       jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(5);
 
-      // Mock evaluations with submissions
       const mockEvaluations = [
         {
           id: 1,
           submissions: [
             { grade: 85.5 },
             { grade: 90 },
-            { grade: null }, // Should be excluded
+            { grade: null },
           ],
         },
         {
@@ -273,7 +271,6 @@ describe('ProfessorsService', () => {
         .spyOn(prisma.evaluation, 'findMany')
         .mockResolvedValue(mockEvaluations as any);
 
-      // Mock enrollments for trend
       const mockEnrollments = [
         { enrolledAt: new Date('2025-09-15') },
         { enrolledAt: new Date('2025-09-20') },
@@ -290,12 +287,11 @@ describe('ProfessorsService', () => {
       expect(result.totalStudents).toBe(50);
       expect(result.totalClasses).toBe(10);
       expect(result.upcomingEvaluations).toBe(5);
-      expect(result.avgStudentScore).toBe(86.5); // (85.5 + 90 + 78 + 92.5) / 4
+      expect(result.avgStudentScore).toBe(86.5);
       expect(result.enrollmentTrend).toBeInstanceOf(Array);
       expect(result.enrollmentTrend.length).toBeGreaterThanOrEqual(1);
       expect(result.enrollmentTrend.length).toBeLessThanOrEqual(6);
 
-      // Verify Prisma methods were called correctly
       expect(prisma.student.count).toHaveBeenCalled();
       expect(prisma.class.count).toHaveBeenCalled();
       expect(prisma.evaluation.count).toHaveBeenCalledWith(
@@ -371,7 +367,7 @@ describe('ProfessorsService', () => {
 
       const result = await service.getDashboardStats();
 
-      expect(result.avgStudentScore).toBe(88); // (85.333 + 90.666) / 2 = 88.0 rounded
+      expect(result.avgStudentScore).toBe(88);
     });
 
     it('should generate enrollment trend for last 6 months', async () => {
@@ -381,13 +377,13 @@ describe('ProfessorsService', () => {
       jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([]);
 
       const mockEnrollments = [
-        { enrolledAt: new Date('2025-06-15') }, // Should be included
+        { enrolledAt: new Date('2025-06-15') },
         { enrolledAt: new Date('2025-07-20') },
         { enrolledAt: new Date('2025-08-05') },
         { enrolledAt: new Date('2025-09-10') },
         { enrolledAt: new Date('2025-10-15') },
         { enrolledAt: new Date('2025-11-05') },
-        { enrolledAt: new Date('2025-04-01') }, // Too old, should be excluded
+        { enrolledAt: new Date('2025-04-01') },
       ];
       jest
         .spyOn(prisma.enrollment, 'findMany')

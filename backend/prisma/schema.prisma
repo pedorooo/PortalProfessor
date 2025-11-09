@@ -84,7 +84,7 @@ model Enrollment {
   classId      Int
   enrolledAt   DateTime         @default(now())
   status       EnrollmentStatus @default(ACTIVE)
-  gradeAverage Float? // média geral
+  gradeAverage Float?
   student      Student          @relation(fields: [studentId], references: [id])
   class        Class            @relation(fields: [classId], references: [id])
   grades       Grade[]
@@ -129,7 +129,7 @@ model Evaluation {
   classId     Int
   dueDate     DateTime
   status      EvaluationStatus       @default(OPEN)
-  gradeWeight Float                  @default(0) // Peso na nota final da classe (0-100%)
+  gradeWeight Float                  @default(0)
   class       Class                  @relation(fields: [classId], references: [id])
   submissions EvaluationSubmission[]
 }
@@ -142,7 +142,7 @@ enum EvaluationStatus {
 model Grade {
   id           Int        @id @default(autoincrement())
   enrollmentId Int
-  value        Float // Nota consolidada do aluno na classe
+  value        Float
   enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
 }
 

@@ -28,7 +28,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
 
-            {/* Rotas protegidas envolvidas pelo layout */}
+            {}
             <Route element={<ProtectedLayout />}>
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<DashboardPage />} />
@@ -54,7 +54,7 @@ function App() {
               </Route>
             </Route>
 
-            {/* Rota padrão */}
+            {}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </ToastProvider>

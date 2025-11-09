@@ -3,7 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ClassDetailPage from "@/pages/ClassDetailPage";
 
-// Mock dos hooks
 vi.mock("@/hooks/use-classes", () => ({
   useClasses: () => ({
     classes: [
@@ -165,7 +164,6 @@ describe("ClassDetailPage", () => {
     renderWithRouter(<ClassDetailPage />);
 
     await waitFor(() => {
-      // 30/40 = 75%
       expect(screen.getByText("75%")).toBeInTheDocument();
     });
   });

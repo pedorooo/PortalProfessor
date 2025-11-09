@@ -31,7 +31,6 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     const result = await this.authService.login(user);
-    // set refresh token as httpOnly cookie
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

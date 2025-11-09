@@ -20,7 +20,6 @@ export function useEvaluationCriteria() {
     return criteria.reduce((sum, c) => sum + c.gradeWeight, 0);
   }, [criteria]);
 
-  // Initialize with provided evaluations
   const fetchCriteria = useCallback((evaluations: EvaluationWeight[]) => {
     setCriteria(evaluations);
     setError(null);
@@ -30,9 +29,7 @@ export function useEvaluationCriteria() {
     async (id: number, name: string, gradeWeight: number) => {
       try {
         setLoading(true);
-        // Update via API
         await updateEvaluation(id, { name, gradeWeight });
-        // Update local state
         setCriteria((prev) =>
           prev.map((c) => (c.id === id ? { ...c, name, gradeWeight } : c))
         );

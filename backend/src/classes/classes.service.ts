@@ -21,9 +21,6 @@ export interface ClassResponse {
 export class ClassesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Create a new class
-   */
   async createClass(dto: CreateClassDto): Promise<ClassResponse> {
     const professor = await this.prisma.professor.findUnique({
       where: { userId: dto.professorId },
@@ -53,9 +50,6 @@ export class ClassesService {
     return await this.formatClassResponse(classRecord);
   }
 
-  /**
-   * Get all classes with pagination and filtering
-   */
   async getAllClasses(
     page: number = 1,
     limit: number = 10,
@@ -79,7 +73,6 @@ export class ClassesService {
       ];
     }
 
-    // Optional subject filter (exact match, case-insensitive)
     if (subject) {
       whereClause.subject = { equals: subject, mode: 'insensitive' };
     }
@@ -121,9 +114,6 @@ export class ClassesService {
     };
   }
 
-  /**
-   * Get a single class by ID
-   */
   async getClassById(classId: number): Promise<ClassResponse> {
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId },
@@ -142,9 +132,6 @@ export class ClassesService {
     return await this.formatClassResponse(classRecord);
   }
 
-  /**
-   * Update a class
-   */
   async updateClass(
     classId: number,
     dto: UpdateClassDto,
@@ -158,7 +145,6 @@ export class ClassesService {
       throw new BadRequestException('Class not found');
     }
 
-    // If professorId is provided, verify professor exists
     let professorInternalId = classRecord.professorId;
     if (dto.professorId !== undefined) {
       const professor = await this.prisma.professor.findUnique({
@@ -194,9 +180,6 @@ export class ClassesService {
     return await this.formatClassResponse(updatedClass);
   }
 
-  /**
-   * Delete a class
-   */
   async deleteClass(classId: number): Promise<void> {
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId },
@@ -206,7 +189,6 @@ export class ClassesService {
       throw new BadRequestException('Class not found');
     }
 
-    // Delete related records in order
     await this.prisma.studentLesson.deleteMany({
       where: {
         lesson: {
@@ -228,9 +210,6 @@ export class ClassesService {
     });
   }
 
-  /**
-   * Get all students enrolled in a class
-   */
   async getClassStudents(
     classId: number,
     page: number = 1,
@@ -249,7 +228,6 @@ export class ClassesService {
     page: number;
     limit: number;
   }> {
-    // Verify class exists
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId },
     });
@@ -293,9 +271,6 @@ export class ClassesService {
     };
   }
 
-  /**
-   * Get all evaluations for a class
-   */
   async getClassEvaluations(
     classId: number,
     page: number = 1,
@@ -314,7 +289,6 @@ export class ClassesService {
     page: number;
     limit: number;
   }> {
-    // Verify class exists
     const classRecord = await this.prisma.class.findUnique({
       where: { id: classId },
     });
@@ -358,11 +332,7 @@ export class ClassesService {
     };
   }
 
-  /**
-   * Helper method to format class response
-   */
   private async formatClassResponse(classRecord: any): Promise<ClassResponse> {
-    // Calculate class average from all evaluation submissions
     const evaluations = await this.prisma.evaluation.findMany({
       where: { classId: classRecord.id },
       include: {
@@ -390,7 +360,6 @@ export class ClassesService {
       }
     }
 
-    // Calculate average attendance
     const lessons = await this.prisma.lesson.findMany({
       where: { classId: classRecord.id },
       include: {

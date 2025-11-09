@@ -7,7 +7,6 @@ async function main() {
   console.log('��� Seed database');
 
   try {
-    // Clean up - Delete in correct order to respect foreign key constraints
     await prisma.evaluationSubmission.deleteMany();
     await prisma.grade.deleteMany();
     await prisma.evaluation.deleteMany();
@@ -19,10 +18,9 @@ async function main() {
     await prisma.student.deleteMany();
     await prisma.professor.deleteMany();
     await prisma.admin.deleteMany();
-    await prisma.refreshToken.deleteMany(); // Delete refresh tokens before users
+    await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
 
-    // Create users
     const user1 = await prisma.user.create({
       data: {
         email: 'professor1@university.edu',
@@ -68,7 +66,6 @@ async function main() {
       },
     });
 
-    // Create professor
     const prof = await prisma.professor.create({
       data: {
         userId: user1.id,
@@ -76,7 +73,6 @@ async function main() {
       },
     });
 
-    // Create students
     const student1 = await prisma.student.create({
       data: {
         userId: user2.id,
@@ -105,7 +101,6 @@ async function main() {
       },
     });
 
-    // Create class
     const classRoom = await prisma.class.create({
       data: {
         name: 'Math 101',
@@ -116,7 +111,6 @@ async function main() {
       },
     });
 
-    // Enroll students
     await prisma.enrollment.create({
       data: {
         studentId: student1.id,
@@ -145,7 +139,6 @@ async function main() {
       },
     });
 
-    // Create evaluations with weights
     const evaluation1 = await prisma.evaluation.create({
       data: {
         name: 'Midterm',
@@ -166,7 +159,6 @@ async function main() {
       },
     });
 
-    // Create evaluation submissions with grades
     await prisma.evaluationSubmission.create({
       data: {
         studentId: student1.id,
@@ -227,7 +219,6 @@ async function main() {
       },
     });
 
-    // Create lessons
     const lesson1 = await prisma.lesson.create({
       data: {
         topic: 'Introduction to Calculus',
@@ -272,8 +263,6 @@ async function main() {
       },
     });
 
-    // Create attendance records
-    // Lesson 1 - All present
     await prisma.studentLesson.create({
       data: {
         studentId: student1.id,
@@ -306,7 +295,6 @@ async function main() {
       },
     });
 
-    // Lesson 2 - One absent
     await prisma.studentLesson.create({
       data: {
         studentId: student1.id,
@@ -339,7 +327,6 @@ async function main() {
       },
     });
 
-    // Lesson 3 - All present
     await prisma.studentLesson.create({
       data: {
         studentId: student1.id,
@@ -372,7 +359,6 @@ async function main() {
       },
     });
 
-    // Lesson 4 - Two absent
     await prisma.studentLesson.create({
       data: {
         studentId: student1.id,

@@ -24,7 +24,6 @@ export default function ClassDetailPage() {
   const toastContext = useToast();
   const [classData, setClassData] = useState<ClassApiResponse | null>(null);
 
-  // Fetch class details from API
   useEffect(() => {
     const fetchClass = async () => {
       try {
@@ -35,7 +34,6 @@ export default function ClassDetailPage() {
       } catch (error: unknown) {
         console.error("Failed to load class:", error);
         toastContext.error("Erro ao carregar turma");
-        // Don't redirect automatically - let child routes handle their own errors
       }
     };
 
@@ -71,7 +69,7 @@ export default function ClassDetailPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {}
       <ClassHeader
         name={classData.name}
         subject={classData.subject}
@@ -79,7 +77,7 @@ export default function ClassDetailPage() {
         description={classData.description || ""}
       />
 
-      {/* Stats */}
+      {}
       <ClassStats
         studentCount={classData.enrollmentCount}
         maxCapacity={classData.maxCapacity}
@@ -89,10 +87,10 @@ export default function ClassDetailPage() {
         averageAttendance={classData.averageAttendance}
       />
 
-      {/* Class Info */}
+      {}
       <ClassInfo professor={classData.professorName} />
 
-      {/* Tabs Section */}
+      {}
       <Tabs defaultValue="students" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="students">Alunos</TabsTrigger>
@@ -100,7 +98,7 @@ export default function ClassDetailPage() {
           <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
         </TabsList>
 
-        {/* Students Tab */}
+        {}
         <TabsContent value="students" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Alunos Matriculados</h2>
@@ -113,7 +111,7 @@ export default function ClassDetailPage() {
           <StudentsList students={students} />
         </TabsContent>
 
-        {/* Lessons Tab */}
+        {}
         <TabsContent value="lessons" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Aulas</h2>
@@ -126,7 +124,7 @@ export default function ClassDetailPage() {
           <LessonsList lessons={lessons} />
         </TabsContent>
 
-        {/* Evaluations Tab */}
+        {}
         <TabsContent value="evaluations" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Avaliações</h2>

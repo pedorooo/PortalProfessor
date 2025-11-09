@@ -1,7 +1,3 @@
-/**
- * Students API
- * CRUD operations for students
- */
 
 import { apiRequest } from "../api-client";
 
@@ -46,9 +42,6 @@ export interface UpdateStudentPayload {
   status?: string;
 }
 
-/**
- * Get all students with pagination
- */
 export async function getStudents(
   page: number = 1,
   limit: number = 10,
@@ -66,18 +59,12 @@ export async function getStudents(
   return apiRequest<StudentsListResponse>(`/students?${params.toString()}`);
 }
 
-/**
- * Get a single student by ID
- */
 export async function getStudentById(
   studentId: number
 ): Promise<StudentApiResponse> {
   return apiRequest<StudentApiResponse>(`/students/${studentId}`);
 }
 
-/**
- * Create a new student
- */
 export async function createStudent(
   payload: CreateStudentPayload
 ): Promise<StudentApiResponse> {
@@ -87,9 +74,6 @@ export async function createStudent(
   });
 }
 
-/**
- * Update a student
- */
 export async function updateStudent(
   studentId: number,
   payload: UpdateStudentPayload
@@ -100,9 +84,6 @@ export async function updateStudent(
   });
 }
 
-/**
- * Delete a student
- */
 export async function deleteStudent(studentId: number): Promise<void> {
   await apiRequest(`/students/${studentId}`, {
     method: "DELETE",

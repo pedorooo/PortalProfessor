@@ -37,9 +37,6 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  /**
-   * Convert User to public profile (remove passwordHash)
-   */
   toPublicProfile(user: User | null): PublicUser | null {
     if (!user) return null;
     const { passwordHash: _p, ...publicUser } = user;

@@ -46,12 +46,10 @@ function AuthProviderInner({
     if (storedToken && storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-        // Schedule token refresh on mount
         try {
           const payload = JSON.parse(atob(storedToken.split(".")[1]));
           scheduleTokenRefresh(payload.exp * 1000);
         } catch {
-          // If we can't parse the token, that's okay
         }
       } catch {
         localStorage.removeItem("accessToken");
@@ -73,26 +71,21 @@ function AuthProviderInner({
 
         const response = await apiLogin(email, password);
 
-        // Validate response has required fields
         if (!response.accessToken) {
           throw new Error("Invalid response from server: missing access token");
         }
 
-        // Store access token
         localStorage.setItem("accessToken", response.accessToken);
 
-        // Use user data from response if available, otherwise parse from token
         let authenticatedUser: User;
 
         if (response.user) {
-          // User data from response
           authenticatedUser = {
             id: String(response.user.id),
             email: response.user.email,
             name: response.user.name,
           };
         } else {
-          // Fallback: parse from token
           try {
             const payload = JSON.parse(
               atob(response.accessToken.split(".")[1])
@@ -113,7 +106,6 @@ function AuthProviderInner({
           }
         }
 
-        // Validate user data
         if (!authenticatedUser.id || !authenticatedUser.email) {
           throw new Error("Invalid user data received");
         }
@@ -121,7 +113,6 @@ function AuthProviderInner({
         localStorage.setItem("user", JSON.stringify(authenticatedUser));
         setUser(authenticatedUser);
 
-        // Schedule token refresh
         try {
           const payload = JSON.parse(atob(response.accessToken.split(".")[1]));
           scheduleTokenRefresh(payload.exp * 1000);
@@ -129,7 +120,6 @@ function AuthProviderInner({
           scheduleTokenRefresh();
         }
 
-        // Redirect to dashboard
         navigate("/dashboard", { replace: true });
       } catch (err) {
         const errorMessage =

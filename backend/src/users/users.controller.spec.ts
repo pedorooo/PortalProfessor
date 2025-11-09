@@ -242,9 +242,6 @@ describe('UsersController', () => {
     });
 
     it('should throw BadRequestException for floating point user ID', async () => {
-      // Note: Number.parseInt('1.5') returns 1, which is a valid integer
-      // If we want to reject floats, we would need to use a different validation method
-      // For now, '1.5' gets parsed as 1 and will look up user with ID 1
       jest.spyOn(service, 'findById').mockResolvedValue(null);
       await expect(controller.getUser('1.5')).rejects.toThrow(
         NotFoundException,
