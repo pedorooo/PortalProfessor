@@ -57,17 +57,25 @@ export default function ClassesPage() {
     return classes;
   }, [searchTerm, selectedSubject, filterClasses]);
 
-  const handleAddClass = (classData: Omit<Class, "id">) => {
-    addClass(classData);
-    setIsDialogOpen(false);
+  const handleAddClass = async (classData: Omit<Class, "id">) => {
+    try {
+      await addClass(classData);
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("Error adding class:", err);
+    }
   };
 
-  const handleUpdateClass = (classData: Class | Omit<Class, "id">) => {
-    if ("id" in classData) {
-      updateClass(classData.id, classData);
+  const handleUpdateClass = async (classData: Class | Omit<Class, "id">) => {
+    try {
+      if ("id" in classData) {
+        await updateClass(classData.id, classData);
+      }
+      setEditingClass(null);
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("Error updating class:", err);
     }
-    setEditingClass(null);
-    setIsDialogOpen(false);
   };
 
   const handleEdit = (classData: Class) => {

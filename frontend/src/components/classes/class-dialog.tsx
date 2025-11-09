@@ -11,6 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SUBJECTS } from "@/constants/subjects";
 
 interface ClassDialogProps {
   isOpen: boolean;
@@ -29,9 +37,8 @@ export function ClassDialog({
 }: Readonly<ClassDialogProps>) {
   const [formData, setFormData] = useState({
     name: "",
+    subject: "" as Class["subject"] | "",
     maxCapacity: "",
-    studentCount: "0",
-    professor: "",
     description: "",
   });
 
@@ -39,17 +46,15 @@ export function ClassDialog({
     if (classData) {
       setFormData({
         name: classData.name,
+        subject: classData.subject || "",
         maxCapacity: classData.maxCapacity.toString(),
-        studentCount: classData.studentCount.toString(),
-        professor: classData.professor,
         description: classData.description || "",
       });
     } else {
       setFormData({
         name: "",
+        subject: "",
         maxCapacity: "",
-        studentCount: "0",
-        professor: "",
         description: "",
       });
     }
@@ -57,26 +62,20 @@ export function ClassDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.maxCapacity || !formData.professor) {
+    if (!formData.name || !formData.maxCapacity || !formData.subject) {
       return;
     }
 
     const newClassData = {
       name: formData.name,
+      subject: formData.subject as Class["subject"],
       maxCapacity: Number.parseInt(formData.maxCapacity, 10),
-      studentCount: Number.parseInt(formData.studentCount, 10),
-      professor: formData.professor,
+      studentCount: classData?.studentCount || 0,
+      professor: classData?.professor || "",
       description: formData.description || undefined,
     };
 
-    if (classData) {
-      onSubmit({
-        ...classData,
-        ...newClassData,
-      });
-    } else {
-      onSubmit(newClassData);
-    }
+    onSubmit(newClassData);
   };
 
   return (
@@ -93,7 +92,7 @@ export function ClassDialog({
             <Label htmlFor="name">Nome da Turma</Label>
             <Input
               id="name"
-              placeholder="Ex: Matemática Avançada"
+              placeholder="Ex: Turma A - Matemática"
               value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
@@ -103,23 +102,31 @@ export function ClassDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="professor">Professor</Label>
-            <Input
-              id="professor"
-              placeholder="Nome do professor"
-              value={formData.professor}
-              onChange={(e) =>
-                setFormData({ ...formData, professor: e.target.value })
+            <Label htmlFor="subject">Disciplina</Label>
+            <Select
+              value={formData.subject}
+              onValueChange={(value) =>
+                setFormData({ ...formData, subject: value as Class["subject"] })
               }
-              required
-            />
+            >
+              <SelectTrigger id="subject">
+                <SelectValue placeholder="Selecione uma disciplina" />
+              </SelectTrigger>
+              <SelectContent>
+                {SUBJECTS.map((subject) => (
+                  <SelectItem key={subject} value={subject}>
+                    {subject}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
             <Input
               id="description"
-              placeholder="Descrição da turma"
+              placeholder="Descrição da turma (opcional)"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -127,35 +134,19 @@ export function ClassDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="maxCapacity">Capacidade Máxima</Label>
-              <Input
-                id="maxCapacity"
-                type="number"
-                min="1"
-                placeholder="30"
-                value={formData.maxCapacity}
-                onChange={(e) =>
-                  setFormData({ ...formData, maxCapacity: e.target.value })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="studentCount">Alunos Atuais</Label>
-              <Input
-                id="studentCount"
-                type="number"
-                min="0"
-                placeholder="0"
-                value={formData.studentCount}
-                onChange={(e) =>
-                  setFormData({ ...formData, studentCount: e.target.value })
-                }
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxCapacity">Capacidade Máxima</Label>
+            <Input
+              id="maxCapacity"
+              type="number"
+              min="1"
+              placeholder="30"
+              value={formData.maxCapacity}
+              onChange={(e) =>
+                setFormData({ ...formData, maxCapacity: e.target.value })
+              }
+              required
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
