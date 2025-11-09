@@ -10,7 +10,7 @@ export interface Student {
 }
 
 export interface Class {
-  id: string;
+  id: number;
   name: string;
   maxCapacity: number;
   studentCount: number;

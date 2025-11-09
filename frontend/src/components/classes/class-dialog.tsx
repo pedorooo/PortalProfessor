@@ -66,16 +66,30 @@ export function ClassDialog({
       return;
     }
 
-    const newClassData = {
-      name: formData.name,
-      subject: formData.subject as Class["subject"],
-      maxCapacity: Number.parseInt(formData.maxCapacity, 10),
-      studentCount: classData?.studentCount || 0,
-      professor: classData?.professor || "",
-      description: formData.description || undefined,
-    };
-
-    onSubmit(newClassData);
+    if (classData) {
+      // Editing: include the id
+      const updatedClassData: Class = {
+        id: classData.id,
+        name: formData.name,
+        subject: formData.subject as Class["subject"],
+        maxCapacity: Number.parseInt(formData.maxCapacity, 10),
+        studentCount: classData.studentCount,
+        professor: classData.professor,
+        description: formData.description || undefined,
+      };
+      onSubmit(updatedClassData);
+    } else {
+      // Creating new: no id needed
+      const newClassData = {
+        name: formData.name,
+        subject: formData.subject as Class["subject"],
+        maxCapacity: Number.parseInt(formData.maxCapacity, 10),
+        studentCount: 0,
+        professor: "",
+        description: formData.description || undefined,
+      };
+      onSubmit(newClassData);
+    }
   };
 
   return (

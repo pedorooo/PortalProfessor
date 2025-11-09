@@ -24,7 +24,7 @@ export function useClasses() {
 
         // Transform API response to frontend Class type
         const transformedClasses: Class[] = response.data.map((apiClass) => ({
-          id: apiClass.id.toString(),
+          id: apiClass.id,
           name: apiClass.name,
           subject: apiClass.subject as Class["subject"],
           description: apiClass.description || undefined,
@@ -77,7 +77,7 @@ export function useClasses() {
 
       // Transform and add to local state
       const newClass: Class = {
-        id: response.id.toString(),
+        id: response.id,
         name: response.name,
         subject: response.subject as Class["subject"],
         description: response.description || undefined,
@@ -98,12 +98,12 @@ export function useClasses() {
   }, []);
 
   const updateClass = useCallback(
-    async (id: string, updates: Partial<Class>) => {
+    async (id: number, updates: Partial<Class>) => {
       try {
         setIsLoading(true);
         setError(null);
 
-        const classId = Number.parseInt(id, 10);
+        const classId = id;
         const response = await apiUpdateClass(classId, {
           name: updates.name,
           subject: updates.subject,
@@ -114,7 +114,7 @@ export function useClasses() {
 
         // Transform and update local state
         const updatedClass: Class = {
-          id: response.id.toString(),
+          id: response.id,
           name: response.name,
           subject: response.subject as Class["subject"],
           description: response.description || undefined,
@@ -138,12 +138,12 @@ export function useClasses() {
     []
   );
 
-  const deleteClass = useCallback(async (id: string) => {
+  const deleteClass = useCallback(async (id: number) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const classId = Number.parseInt(id, 10);
+      const classId = id;
       await apiDeleteClass(classId);
 
       setClasses((prev) => prev.filter((cls) => cls.id !== id));

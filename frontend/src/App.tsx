@@ -5,6 +5,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
+import { Toast } from "@/components/Toast";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardLayout from "@/pages/DashboardLayout";
@@ -21,38 +23,41 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+        <ToastProvider>
+          <Toast />
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* Rotas protegidas envolvidas pelo layout */}
-          <Route element={<ProtectedLayout />}>
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="students" element={<StudentsPage />} />
-              <Route path="classes" element={<ClassesPage />} />
-              <Route path="classes/:classId" element={<ClassDetailPage />} />
-              <Route
-                path="classes/:classId/students"
-                element={<ClassEnrolledStudentsPage />}
-              />
-              <Route
-                path="classes/:classId/lessons"
-                element={<ClassLessonsPage />}
-              />
-              <Route
-                path="classes/:classId/evaluation-config"
-                element={<ClassEvaluationConfigPage />}
-              />
-              <Route
-                path="evaluation-criteria"
-                element={<EvaluationCriteriaPage />}
-              />
+            {/* Rotas protegidas envolvidas pelo layout */}
+            <Route element={<ProtectedLayout />}>
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="students" element={<StudentsPage />} />
+                <Route path="classes" element={<ClassesPage />} />
+                <Route path="classes/:classId" element={<ClassDetailPage />} />
+                <Route
+                  path="classes/:classId/students"
+                  element={<ClassEnrolledStudentsPage />}
+                />
+                <Route
+                  path="classes/:classId/lessons"
+                  element={<ClassLessonsPage />}
+                />
+                <Route
+                  path="classes/:classId/evaluation-config"
+                  element={<ClassEvaluationConfigPage />}
+                />
+                <Route
+                  path="evaluation-criteria"
+                  element={<EvaluationCriteriaPage />}
+                />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Rota padrão */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+            {/* Rota padrão */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </ToastProvider>
       </AuthProvider>
     </Router>
   );

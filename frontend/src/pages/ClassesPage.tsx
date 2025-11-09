@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useClasses } from "@/hooks/use-classes";
+import { useToast } from "@/context/ToastContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,7 @@ import type { Class } from "@/types";
 
 export default function ClassesPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const { isLoading, addClass, updateClass, deleteClass, filterClasses } =
     useClasses();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -60,8 +62,12 @@ export default function ClassesPage() {
   const handleAddClass = async (classData: Omit<Class, "id">) => {
     try {
       await addClass(classData);
+      toast.success(`Turma "${classData.name}" criada com sucesso!`);
       setIsDialogOpen(false);
     } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao criar turma";
+      toast.error(errorMessage);
       console.error("Error adding class:", err);
     }
   };
@@ -70,10 +76,16 @@ export default function ClassesPage() {
     try {
       if ("id" in classData) {
         await updateClass(classData.id, classData);
+        toast.success(`Turma "${classData.name}" atualizada com sucesso!`);
+        setEditingClass(null);
+        setIsDialogOpen(false);
+      } else {
+        toast.error("Erro ao atualizar turma: ID não encontrado");
       }
-      setEditingClass(null);
-      setIsDialogOpen(false);
     } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao atualizar turma";
+      toast.error(errorMessage);
       console.error("Error updating class:", err);
     }
   };
@@ -95,11 +107,19 @@ export default function ClassesPage() {
     setDeleteConfirmOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (classToDelete) {
-      deleteClass(classToDelete.id);
-      setDeleteConfirmOpen(false);
-      setClassToDelete(null);
+      try {
+        await deleteClass(classToDelete.id);
+        toast.success(`Turma "${classToDelete.name}" deletada com sucesso!`);
+        setDeleteConfirmOpen(false);
+        setClassToDelete(null);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro ao deletar turma";
+        toast.error(errorMessage);
+        console.error("Error deleting class:", err);
+      }
     }
   };
 
