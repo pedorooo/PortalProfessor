@@ -223,6 +223,206 @@ export class ClassesService {
   }
 
   /**
+   * Get all students enrolled in a class
+   */
+  async getClassStudents(
+    classId: number,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
+    students: Array<{
+      id: number;
+      userId: number;
+      name: string;
+      email: string;
+      phone: string | null;
+      status: string;
+      enrolledAt: Date;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    // Verify class exists
+    const classRecord = await this.prisma.class.findUnique({
+      where: { id: classId },
+    });
+
+    if (!classRecord) {
+      throw new BadRequestException('Class not found');
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [enrollments, total] = await Promise.all([
+      this.prisma.enrollment.findMany({
+        where: { classId },
+        include: {
+          student: {
+            include: { user: true },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { enrolledAt: 'desc' },
+      }),
+      this.prisma.enrollment.count({ where: { classId } }),
+    ]);
+
+    const students = enrollments.map((enrollment) => ({
+      id: enrollment.student.id,
+      userId: enrollment.student.userId,
+      name: enrollment.student.user.name,
+      email: enrollment.student.user.email,
+      phone: enrollment.student.phone,
+      status: enrollment.status,
+      enrolledAt: enrollment.enrolledAt,
+    }));
+
+    return {
+      students,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  /**
+   * Get all evaluations for a class
+   */
+  async getClassEvaluations(
+    classId: number,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    status?: string,
+  ): Promise<{
+    evaluations: Array<{
+      id: number;
+      name: string;
+      dueDate: Date;
+      status: string;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    // Verify class exists
+    const classRecord = await this.prisma.class.findUnique({
+      where: { id: classId },
+    });
+
+    if (!classRecord) {
+      throw new BadRequestException('Class not found');
+    }
+
+    const skip = (page - 1) * limit;
+    const whereClause: any = { classId };
+
+    if (search) {
+      whereClause.name = { contains: search, mode: 'insensitive' };
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    const [evaluations, total] = await Promise.all([
+      this.prisma.evaluation.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { dueDate: 'asc' },
+      }),
+      this.prisma.evaluation.count({ where: whereClause }),
+    ]);
+
+    return {
+      evaluations: evaluations.map((e) => ({
+        id: e.id,
+        name: e.name,
+        dueDate: e.dueDate,
+        status: e.status,
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  /**
+   * Get all evaluation criteria for a class (from all evaluations in the class)
+   */
+  async getClassEvaluationCriteria(
+    classId: number,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
+    criteria: Array<{
+      id: number;
+      name: string;
+      weight: number;
+      description: string | null;
+      evaluationId: number;
+      evaluationName: string;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    // Verify class exists
+    const classRecord = await this.prisma.class.findUnique({
+      where: { id: classId },
+    });
+
+    if (!classRecord) {
+      throw new BadRequestException('Class not found');
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Get all evaluations for this class, then their criteria
+    const [criteria, total] = await Promise.all([
+      this.prisma.evaluationCriterion.findMany({
+        where: {
+          evaluation: {
+            classId,
+          },
+        },
+        include: {
+          evaluation: {
+            select: { name: true },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.evaluationCriterion.count({
+        where: {
+          evaluation: {
+            classId,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      criteria: criteria.map((c) => ({
+        id: c.id,
+        name: c.name,
+        weight: c.weight,
+        description: c.description,
+        evaluationId: c.evaluationId,
+        evaluationName: c.evaluation.name,
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  /**
    * Helper method to format class response
    */
   private formatClassResponse(classRecord: any): ClassResponse {
