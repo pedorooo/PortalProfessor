@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   BadRequestException,
+  UnauthorizedException,
   Req,
   Res,
 } from '@nestjs/common';
@@ -27,7 +28,7 @@ export class AuthController {
       payload.password,
     );
     if (!user) {
-      return { status: 'error', message: 'Invalid credentials' };
+      throw new UnauthorizedException('Invalid credentials');
     }
     const result = await this.authService.login(user);
     // set refresh token as httpOnly cookie
@@ -41,7 +42,7 @@ export class AuthController {
         : undefined,
     };
     res.cookie('refreshToken', result.refreshToken, cookieOptions);
-    return { accessToken: result.accessToken };
+    return { accessToken: result.accessToken, user };
   }
 
   @Post('register')
