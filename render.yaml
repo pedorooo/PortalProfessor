@@ -1,28 +1,16 @@
 services:
   - type: web
-    name: portal-professor-backend
+    name: backend
     env: node
-    region: oregon
-    plan: free
     rootDir: backend
-    buildCommand: npm ci && npx prisma generate && npm run build
-    startCommand: npx prisma migrate deploy && node dist/main
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: portal-professor-db
+          name: backend-db
           property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: JWT_REFRESH_SECRET
-        generateValue: true
-      - key: CORS_ORIGIN
-        value: https://your-frontend-url.onrender.com
-
+      - key: NODE_ENV
+        value: production
 databases:
-  - name: portal-professor-db
-    plan: free
-    databaseName: portal_professor
-    user: portal_professor_user
+  - name: backend-db
