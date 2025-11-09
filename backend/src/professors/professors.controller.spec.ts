@@ -27,6 +27,7 @@ describe('ProfessorsController', () => {
             getProfessorById: jest.fn(),
             updateProfessor: jest.fn(),
             createProfessor: jest.fn(),
+            getDashboardStats: jest.fn(),
           },
         },
       ],
@@ -190,6 +191,58 @@ describe('ProfessorsController', () => {
       await expect(controller.updateProfessor(999, dto)).rejects.toThrow(
         'Professor not found',
       );
+    });
+  });
+
+  describe('getDashboardStats', () => {
+    it('should return dashboard statistics', async () => {
+      const mockDashboardStats = {
+        totalStudents: 50,
+        totalClasses: 10,
+        upcomingEvaluations: 5,
+        avgStudentScore: 85.5,
+        enrollmentTrend: [
+          { month: 'jun 2025', students: 10 },
+          { month: 'jul 2025', students: 15 },
+          { month: 'ago 2025', students: 20 },
+          { month: 'set 2025', students: 25 },
+          { month: 'out 2025', students: 30 },
+          { month: 'nov 2025', students: 35 },
+        ],
+      };
+
+      jest
+        .spyOn(service, 'getDashboardStats')
+        .mockResolvedValue(mockDashboardStats as any);
+
+      const result = await controller.getDashboardStats();
+
+      expect(service.getDashboardStats).toHaveBeenCalled();
+      expect(result).toEqual(mockDashboardStats);
+      expect(result.totalStudents).toBe(50);
+      expect(result.totalClasses).toBe(10);
+      expect(result.upcomingEvaluations).toBe(5);
+      expect(result.avgStudentScore).toBe(85.5);
+      expect(result.enrollmentTrend).toHaveLength(6);
+    });
+
+    it('should handle empty dashboard statistics', async () => {
+      const mockEmptyStats = {
+        totalStudents: 0,
+        totalClasses: 0,
+        upcomingEvaluations: 0,
+        avgStudentScore: 0,
+        enrollmentTrend: [],
+      };
+
+      jest
+        .spyOn(service, 'getDashboardStats')
+        .mockResolvedValue(mockEmptyStats as any);
+
+      const result = await controller.getDashboardStats();
+
+      expect(result.totalStudents).toBe(0);
+      expect(result.totalClasses).toBe(0);
     });
   });
 });

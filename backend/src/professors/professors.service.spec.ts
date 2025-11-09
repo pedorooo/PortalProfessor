@@ -42,6 +42,19 @@ describe('ProfessorsService', () => {
               update: jest.fn(),
               create: jest.fn(),
             },
+            student: {
+              count: jest.fn(),
+            },
+            class: {
+              count: jest.fn(),
+            },
+            evaluation: {
+              count: jest.fn(),
+              findMany: jest.fn(),
+            },
+            enrollment: {
+              findMany: jest.fn(),
+            },
           },
         },
         {
@@ -231,6 +244,164 @@ describe('ProfessorsService', () => {
       await expect(
         service.updateProfessor(999, { name: 'Test' }),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('getDashboardStats', () => {
+    it('should return dashboard statistics for all students and classes', async () => {
+      // Mock counts
+      jest.spyOn(prisma.student, 'count').mockResolvedValue(50);
+      jest.spyOn(prisma.class, 'count').mockResolvedValue(10);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(5);
+
+      // Mock evaluations with submissions
+      const mockEvaluations = [
+        {
+          id: 1,
+          submissions: [
+            { grade: 85.5 },
+            { grade: 90 },
+            { grade: null }, // Should be excluded
+          ],
+        },
+        {
+          id: 2,
+          submissions: [{ grade: 78 }, { grade: 92.5 }],
+        },
+      ];
+      jest
+        .spyOn(prisma.evaluation, 'findMany')
+        .mockResolvedValue(mockEvaluations as any);
+
+      // Mock enrollments for trend
+      const mockEnrollments = [
+        { enrolledAt: new Date('2025-09-15') },
+        { enrolledAt: new Date('2025-09-20') },
+        { enrolledAt: new Date('2025-10-05') },
+        { enrolledAt: new Date('2025-10-10') },
+        { enrolledAt: new Date('2025-11-01') },
+      ];
+      jest
+        .spyOn(prisma.enrollment, 'findMany')
+        .mockResolvedValue(mockEnrollments as any);
+
+      const result = await service.getDashboardStats();
+
+      expect(result.totalStudents).toBe(50);
+      expect(result.totalClasses).toBe(10);
+      expect(result.upcomingEvaluations).toBe(5);
+      expect(result.avgStudentScore).toBe(86.5); // (85.5 + 90 + 78 + 92.5) / 4
+      expect(result.enrollmentTrend).toBeInstanceOf(Array);
+      expect(result.enrollmentTrend.length).toBeGreaterThanOrEqual(1);
+      expect(result.enrollmentTrend.length).toBeLessThanOrEqual(6);
+
+      // Verify Prisma methods were called correctly
+      expect(prisma.student.count).toHaveBeenCalled();
+      expect(prisma.class.count).toHaveBeenCalled();
+      expect(prisma.evaluation.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            dueDate: expect.any(Object),
+          }),
+        }),
+      );
+      expect(prisma.evaluation.findMany).toHaveBeenCalledWith({
+        select: {
+          id: true,
+          submissions: {
+            select: { grade: true },
+          },
+        },
+      });
+      expect(prisma.enrollment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            enrolledAt: expect.any(Object),
+          }),
+          select: { enrolledAt: true },
+          orderBy: { enrolledAt: 'asc' },
+        }),
+      );
+    });
+
+    it('should handle zero students and classes', async () => {
+      jest.spyOn(prisma.student, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.class, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.enrollment, 'findMany').mockResolvedValue([]);
+
+      const result = await service.getDashboardStats();
+
+      expect(result.totalStudents).toBe(0);
+      expect(result.totalClasses).toBe(0);
+      expect(result.upcomingEvaluations).toBe(0);
+      expect(result.avgStudentScore).toBe(0);
+      expect(result.enrollmentTrend).toBeInstanceOf(Array);
+    });
+
+    it('should calculate average score correctly with no grades', async () => {
+      jest.spyOn(prisma.student, 'count').mockResolvedValue(10);
+      jest.spyOn(prisma.class, 'count').mockResolvedValue(5);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([
+        {
+          id: 1,
+          submissions: [{ grade: null }, { grade: null }],
+        },
+      ] as any);
+      jest.spyOn(prisma.enrollment, 'findMany').mockResolvedValue([]);
+
+      const result = await service.getDashboardStats();
+
+      expect(result.avgStudentScore).toBe(0);
+    });
+
+    it('should round average score to 2 decimal places', async () => {
+      jest.spyOn(prisma.student, 'count').mockResolvedValue(10);
+      jest.spyOn(prisma.class, 'count').mockResolvedValue(5);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([
+        {
+          id: 1,
+          submissions: [{ grade: 85.333 }, { grade: 90.666 }],
+        },
+      ] as any);
+      jest.spyOn(prisma.enrollment, 'findMany').mockResolvedValue([]);
+
+      const result = await service.getDashboardStats();
+
+      expect(result.avgStudentScore).toBe(88); // (85.333 + 90.666) / 2 = 88.0 rounded
+    });
+
+    it('should generate enrollment trend for last 6 months', async () => {
+      jest.spyOn(prisma.student, 'count').mockResolvedValue(10);
+      jest.spyOn(prisma.class, 'count').mockResolvedValue(5);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([]);
+
+      const mockEnrollments = [
+        { enrolledAt: new Date('2025-06-15') }, // Should be included
+        { enrolledAt: new Date('2025-07-20') },
+        { enrolledAt: new Date('2025-08-05') },
+        { enrolledAt: new Date('2025-09-10') },
+        { enrolledAt: new Date('2025-10-15') },
+        { enrolledAt: new Date('2025-11-05') },
+        { enrolledAt: new Date('2025-04-01') }, // Too old, should be excluded
+      ];
+      jest
+        .spyOn(prisma.enrollment, 'findMany')
+        .mockResolvedValue(mockEnrollments as any);
+
+      const result = await service.getDashboardStats();
+
+      expect(result.enrollmentTrend).toBeInstanceOf(Array);
+      expect(result.enrollmentTrend.length).toBeGreaterThanOrEqual(1);
+      expect(result.enrollmentTrend.length).toBeLessThanOrEqual(6);
+      expect(result.enrollmentTrend[0]).toHaveProperty('month');
+      expect(result.enrollmentTrend[0]).toHaveProperty('students');
+      expect(typeof result.enrollmentTrend[0].month).toBe('string');
+      expect(typeof result.enrollmentTrend[0].students).toBe('number');
     });
   });
 });
