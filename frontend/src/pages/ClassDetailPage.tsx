@@ -1,9 +1,9 @@
 "use client";
 
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useClasses } from "@/hooks/use-classes";
 import { useClassStudents } from "@/hooks/use-class-students";
 import { useClassLessons } from "@/hooks/use-class-lessons";
 import { useClassEvaluations } from "@/hooks/use-class-evaluations";
@@ -14,17 +14,37 @@ import { StudentsList } from "@/components/class/StudentsList";
 import { LessonsList } from "@/components/class/LessonsList";
 import { EvaluationsList } from "@/components/class/EvaluationsList";
 import { SUBJECT_COLORS } from "@/constants/subjects";
+import { getClassById } from "@/lib/api-client";
+import type { ClassApiResponse } from "@/lib/api-client";
+import { useToast } from "@/context/ToastContext";
 
 export default function ClassDetailPage() {
   const navigate = useNavigate();
   const { classId } = useParams<{ classId: string }>();
-  const { classes } = useClasses();
+  const toastContext = useToast();
+  const [classData, setClassData] = useState<ClassApiResponse | null>(null);
+
+  // Fetch class details from API
+  useEffect(() => {
+    const fetchClass = async () => {
+      try {
+        if (!classId) return;
+        const classIdNumber = Number.parseInt(classId, 10);
+        const data = await getClassById(classIdNumber);
+        setClassData(data);
+      } catch (error: unknown) {
+        console.error("Failed to load class:", error);
+        toastContext.error("Erro ao carregar turma");
+        navigate("/dashboard/classes");
+      }
+    };
+
+    fetchClass();
+  }, [classId, toastContext, navigate]);
+
   const { students } = useClassStudents(classId || "");
   const { lessons } = useClassLessons(classId || "");
   const { evaluations } = useClassEvaluations(classId || "");
-
-  // Find the class by ID
-  const classData = classes.find((cls) => cls.id === classId);
 
   if (!classData) {
     return (
@@ -47,7 +67,7 @@ export default function ClassDetailPage() {
     (classData.subject && SUBJECT_COLORS[classData.subject]) ||
     SUBJECT_COLORS.Matemática;
   const enrollmentPercentage =
-    (classData.studentCount / classData.maxCapacity) * 100;
+    (classData.enrollmentCount / classData.maxCapacity) * 100;
 
   return (
     <div className="p-6 space-y-6">
@@ -55,20 +75,20 @@ export default function ClassDetailPage() {
       <ClassHeader
         name={classData.name}
         subject={classData.subject}
-        professor={classData.professor}
+        professor={classData.professorName}
         description={classData.description || ""}
       />
 
       {/* Stats */}
       <ClassStats
-        studentCount={classData.studentCount}
+        studentCount={classData.enrollmentCount}
         maxCapacity={classData.maxCapacity}
         enrollmentPercentage={enrollmentPercentage}
         barColor={colors.bar}
       />
 
       {/* Class Info */}
-      <ClassInfo professor={classData.professor} />
+      <ClassInfo professor={classData.professorName} />
 
       {/* Tabs Section */}
       <Tabs defaultValue="students" className="w-full">

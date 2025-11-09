@@ -267,3 +267,129 @@ export async function deleteClass(classId: number): Promise<void> {
     method: "DELETE",
   });
 }
+
+/**
+ * Class Students API
+ */
+export interface ClassStudent {
+  id: number;
+  userId: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: string;
+  enrolledAt: string;
+}
+
+export interface ClassStudentsResponse {
+  data: ClassStudent[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+/**
+ * Get all students in a class
+ */
+export async function getClassStudents(
+  classId: number,
+  page: number = 1,
+  limit: number = 10
+): Promise<ClassStudentsResponse> {
+  const params = new URLSearchParams();
+  params.set("page", page.toString());
+  params.set("limit", limit.toString());
+
+  return apiRequest<ClassStudentsResponse>(
+    `/classes/${classId}/students?${params.toString()}`
+  );
+}
+
+/**
+ * Class Evaluations API
+ */
+export interface ClassEvaluation {
+  id: number;
+  name: string;
+  dueDate: string;
+  status: string;
+}
+
+export interface ClassEvaluationsResponse {
+  data: ClassEvaluation[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+/**
+ * Get all evaluations in a class
+ */
+export async function getClassEvaluations(
+  classId: number,
+  page: number = 1,
+  limit: number = 10,
+  search?: string,
+  status?: string
+): Promise<ClassEvaluationsResponse> {
+  const params = new URLSearchParams();
+  params.set("page", page.toString());
+  params.set("limit", limit.toString());
+  if (search) params.set("search", search);
+  if (status) params.set("status", status);
+
+  return apiRequest<ClassEvaluationsResponse>(
+    `/classes/${classId}/evaluations?${params.toString()}`
+  );
+}
+
+/**
+ * Class Evaluation Criteria API
+ */
+export interface EvaluationCriterion {
+  id: number;
+  name: string;
+  weight: number;
+  description: string | null;
+  evaluationId: number;
+  evaluationName: string;
+}
+
+export interface ClassEvaluationCriteriaResponse {
+  data: EvaluationCriterion[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+/**
+ * Get all evaluation criteria for a class
+ */
+export async function getClassEvaluationCriteria(
+  classId: number,
+  page: number = 1,
+  limit: number = 10
+): Promise<ClassEvaluationCriteriaResponse> {
+  const params = new URLSearchParams();
+  params.set("page", page.toString());
+  params.set("limit", limit.toString());
+
+  return apiRequest<ClassEvaluationCriteriaResponse>(
+    `/classes/${classId}/evaluation-criteria?${params.toString()}`
+  );
+}
