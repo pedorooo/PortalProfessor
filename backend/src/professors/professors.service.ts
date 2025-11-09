@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import type { UpdateProfessorDto } from './dto/update-professor.dto';
 import type { CreateProfessorDto } from './dto/create-professor.dto';
+import type { DashboardStatsResponse } from './dto/dashboard-stats.dto';
 import type { Role } from '@prisma/client';
 
 export interface ProfessorResponse {
@@ -163,6 +164,99 @@ export class ProfessorsService {
     });
 
     return this.formatProfessorResponse(updatedProfessor!);
+  }
+
+  /**
+   * Get dashboard statistics for all students and classes in the system
+   */
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    // Get total number of students in the system
+    const totalStudents = await this.prisma.student.count();
+
+    // Get total number of classes in the system
+    const totalClasses = await this.prisma.class.count();
+
+    // Get upcoming evaluations (next 30 days) across all classes
+    const now = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(now.getDate() + 30);
+
+    const upcomingEvaluations = await this.prisma.evaluation.count({
+      where: {
+        dueDate: {
+          gte: now,
+          lte: thirtyDaysFromNow,
+        },
+      },
+    });
+
+    // Get average student score across all evaluation submissions
+    const evaluations = await this.prisma.evaluation.findMany({
+      select: {
+        id: true,
+        submissions: {
+          select: { grade: true },
+        },
+      },
+    });
+
+    let totalGrades = 0;
+    let gradeCount = 0;
+    for (const evaluation of evaluations) {
+      for (const submission of evaluation.submissions) {
+        if (submission.grade !== null) {
+          totalGrades += submission.grade;
+          gradeCount++;
+        }
+      }
+    }
+    const avgStudentScore = gradeCount > 0 ? totalGrades / gradeCount : 0;
+
+    // Get enrollment trend for last 6 months across all classes
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
+
+    const enrollmentsForTrend = await this.prisma.enrollment.findMany({
+      where: {
+        enrolledAt: { gte: sixMonthsAgo },
+      },
+      select: { enrolledAt: true },
+      orderBy: { enrolledAt: 'asc' },
+    });
+
+    // Group enrollments by month
+    const enrollmentsByMonth = new Map<string, number>();
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(now.getMonth() - i);
+      const monthKey = date.toLocaleDateString('pt-BR', {
+        month: 'short',
+        year: 'numeric',
+      });
+      enrollmentsByMonth.set(monthKey, 0);
+    }
+
+    for (const enrollment of enrollmentsForTrend) {
+      const monthKey = enrollment.enrolledAt.toLocaleDateString('pt-BR', {
+        month: 'short',
+        year: 'numeric',
+      });
+      if (enrollmentsByMonth.has(monthKey)) {
+        enrollmentsByMonth.set(monthKey, enrollmentsByMonth.get(monthKey)! + 1);
+      }
+    }
+
+    const enrollmentTrend = Array.from(enrollmentsByMonth.entries()).map(
+      ([month, students]) => ({ month, students }),
+    );
+
+    return {
+      totalStudents,
+      totalClasses,
+      upcomingEvaluations,
+      avgStudentScore: Math.round(avgStudentScore * 100) / 100,
+      enrollmentTrend,
+    };
   }
 
   /**

@@ -10,6 +10,7 @@ import {
   Legend,
 } from "recharts";
 import { Users, BookOpen, ClipboardList, TrendingUp } from "lucide-react";
+import { useDashboardStats } from "@/hooks/use-dashboard-stats";
 
 const mockData = {
   totalStudents: 150,
@@ -65,6 +66,32 @@ const mockData = {
 };
 
 export default function DashboardPage() {
+  const { stats, isLoading, error } = useDashboardStats();
+
+  if (isLoading) {
+    return (
+      <div className="p-8 space-y-8">
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground">
+            Carregando dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="p-8 space-y-8">
+        <div className="text-center py-12">
+          <p className="text-lg text-red-500">
+            {error || "Falha ao carregar dados do dashboard"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 space-y-8">
       <div className="">
@@ -80,7 +107,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{mockData.totalStudents}</div>
+            <div className="text-2xl font-bold">{stats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">Alunos ativos</p>
           </CardContent>
         </Card>
@@ -93,7 +120,7 @@ export default function DashboardPage() {
             <BookOpen className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{mockData.totalClasses}</div>
+            <div className="text-2xl font-bold">{stats.totalClasses}</div>
             <p className="text-xs text-muted-foreground">Turmas em ensino</p>
           </CardContent>
         </Card>
@@ -107,7 +134,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="text-2xl font-bold">
-              {mockData.upcomingEvaluations}
+              {stats.upcomingEvaluations}
             </div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
@@ -121,7 +148,7 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{mockData.avgStudentScore}</div>
+            <div className="text-2xl font-bold">{stats.avgStudentScore}</div>
             <p className="text-xs text-muted-foreground">De 10</p>
           </CardContent>
         </Card>
@@ -133,7 +160,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="pt-4">
           <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={mockData.yearlyStudentAcquisition}>
+            <LineChart data={stats.enrollmentTrend}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />

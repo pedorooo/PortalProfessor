@@ -18,6 +18,7 @@ import { Pagination } from '../common/decorators/pagination.decorator';
 import { createPaginatedResponse } from '../common/utils/pagination.util';
 import type { PaginationParams } from '../common/utils/pagination.util';
 import type { ProfessorResponse } from './professors.service';
+import type { DashboardStatsResponse } from './dto/dashboard-stats.dto';
 
 @Controller('professors')
 @UseGuards(JwtAuthGuard)
@@ -67,6 +68,15 @@ export class ProfessorsController {
       result.page,
       result.limit,
     );
+  }
+
+  /**
+   * Get dashboard statistics for all students and classes
+   * GET /professors/dashboard
+   */
+  @Get('dashboard')
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    return this.professorsService.getDashboardStats();
   }
 
   /**
