@@ -193,37 +193,4 @@ export class ClassesController {
       result.limit,
     );
   }
-
-  /**
-   * Get all evaluation criteria for a class
-   * GET /classes/:classId/evaluation-criteria?page=1&limit=10
-   */
-  @Get(':classId/evaluation-criteria')
-  async getClassEvaluationCriteria(
-    @Param('classId', ParseIntPipe) classId: number,
-    @Pagination() pagination: PaginationParams,
-  ): Promise<{
-    data: unknown[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
-  }> {
-    const result = await this.classesService.getClassEvaluationCriteria(
-      classId,
-      pagination.page,
-      pagination.limit,
-    );
-
-    return createPaginatedResponse(
-      result.criteria,
-      result.total,
-      result.page,
-      result.limit,
-    );
-  }
 }

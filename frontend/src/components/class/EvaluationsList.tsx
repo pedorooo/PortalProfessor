@@ -1,15 +1,20 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import type { ClassEvaluation } from "@/hooks/use-class-evaluations";
 
 interface EvaluationsListProps {
   readonly evaluations: ClassEvaluation[];
   readonly isLoading?: boolean;
+  readonly classId?: string;
 }
 
 export function EvaluationsList({
   evaluations,
   isLoading = false,
+  classId,
 }: EvaluationsListProps) {
+  const navigate = useNavigate();
   if (isLoading) {
     return (
       <Card>
@@ -46,9 +51,6 @@ export function EvaluationsList({
               statusClass = "bg-yellow-100 text-yellow-800";
             }
 
-            const submissionPercentage =
-              (evaluation.submitted / evaluation.total) * 100;
-
             return (
               <div
                 key={evaluation.id}
@@ -61,38 +63,24 @@ export function EvaluationsList({
                       Data de entrega: {evaluation.dueDate}
                     </p>
                   </div>
-                  <span
-                    className={`px-3 py-1 text-xs font-semibold rounded-full ${statusClass}`}
-                  >
-                    {evaluation.status}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-6 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Entregas
-                    </p>
-                    <p className="font-semibold">
-                      {evaluation.submitted}/{evaluation.total}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Taxa de Entrega
-                    </p>
-                    <div className="w-24 h-2 bg-gray-200 rounded-full">
-                      <div
-                        className="h-full bg-purple-600 rounded-full"
-                        style={{ width: `${submissionPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Peso</p>
-                    <p className="font-semibold">{evaluation.weight}%</p>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-3 py-1 text-xs font-semibold rounded-full ${statusClass}`}
+                    >
+                      {evaluation.status}
+                    </span>
+                    {classId && (
+                      <Button
+                        onClick={() =>
+                          navigate(
+                            `/dashboard/classes/${classId}/evaluations/${evaluation.id}/config`
+                          )
+                        }
+                        className="bg-purple-600 hover:bg-purple-700 text-sm"
+                      >
+                        Configurar
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

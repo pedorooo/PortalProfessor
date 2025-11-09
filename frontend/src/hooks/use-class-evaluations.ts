@@ -6,6 +6,11 @@ export interface ClassEvaluation {
   name: string;
   dueDate: string;
   status: string;
+  gradeWeight?: number;
+  // Mock fields for UI display (from submissions)
+  submitted?: number;
+  total?: number;
+  weight?: number; // Alias for gradeWeight
 }
 
 export function useClassEvaluations(classId: string) {
@@ -19,7 +24,14 @@ export function useClassEvaluations(classId: string) {
         setLoading(true);
         const classIdNumber = Number.parseInt(classId, 10);
         const response = await getClassEvaluations(classIdNumber, 1, 10);
-        setEvaluations(response.data);
+        // Map API response to include mock fields for backward compatibility
+        const mappedEvaluations = response.data.map((eval_) => ({
+          ...eval_,
+          weight: eval_.gradeWeight || 0,
+          submitted: 0, // Mock: would come from actual submission data
+          total: 0, // Mock: would come from actual submission data
+        }));
+        setEvaluations(mappedEvaluations);
         setError(null);
       } catch (err) {
         setError("Erro ao carregar avaliações");

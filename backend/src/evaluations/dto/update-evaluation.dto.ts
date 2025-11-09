@@ -7,6 +7,11 @@ export const UpdateEvaluationSchema = z.object({
     .max(255, 'Name must not exceed 255 characters')
     .optional(),
   dueDate: z.string().pipe(z.coerce.date()).optional(),
+  gradeWeight: z
+    .number()
+    .min(0, 'Grade weight must be at least 0')
+    .max(100, 'Grade weight must not exceed 100')
+    .optional(),
   status: z.enum(['OPEN', 'CLOSED']).optional(),
 });
 

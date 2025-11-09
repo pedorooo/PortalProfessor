@@ -302,6 +302,7 @@ export class ClassesService {
       name: string;
       dueDate: Date;
       status: string;
+      gradeWeight: number;
     }>;
     total: number;
     page: number;
@@ -343,78 +344,7 @@ export class ClassesService {
         name: e.name,
         dueDate: e.dueDate,
         status: e.status,
-      })),
-      total,
-      page,
-      limit,
-    };
-  }
-
-  /**
-   * Get all evaluation criteria for a class (from all evaluations in the class)
-   */
-  async getClassEvaluationCriteria(
-    classId: number,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{
-    criteria: Array<{
-      id: number;
-      name: string;
-      weight: number;
-      description: string | null;
-      evaluationId: number;
-      evaluationName: string;
-    }>;
-    total: number;
-    page: number;
-    limit: number;
-  }> {
-    // Verify class exists
-    const classRecord = await this.prisma.class.findUnique({
-      where: { id: classId },
-    });
-
-    if (!classRecord) {
-      throw new BadRequestException('Class not found');
-    }
-
-    const skip = (page - 1) * limit;
-
-    // Get all evaluations for this class, then their criteria
-    const [criteria, total] = await Promise.all([
-      this.prisma.evaluationCriterion.findMany({
-        where: {
-          evaluation: {
-            classId,
-          },
-        },
-        include: {
-          evaluation: {
-            select: { name: true },
-          },
-        },
-        skip,
-        take: limit,
-        orderBy: { id: 'asc' },
-      }),
-      this.prisma.evaluationCriterion.count({
-        where: {
-          evaluation: {
-            classId,
-          },
-        },
-      }),
-    ]);
-
-    return {
-      criteria: criteria.map((c) => ({
-        id: c.id,
-        name: c.name,
-        weight: c.weight,
-        description: c.description,
-        evaluationId: c.evaluationId,
-        evaluationName: c.evaluation.name,
+        gradeWeight: e.gradeWeight,
       })),
       total,
       page,

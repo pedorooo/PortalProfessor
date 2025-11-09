@@ -35,12 +35,12 @@ export default function ClassDetailPage() {
       } catch (error: unknown) {
         console.error("Failed to load class:", error);
         toastContext.error("Erro ao carregar turma");
-        navigate("/dashboard/classes");
+        // Don't redirect automatically - let child routes handle their own errors
       }
     };
 
     fetchClass();
-  }, [classId, toastContext, navigate]);
+  }, [classId, toastContext]);
 
   const { students } = useClassStudents(classId || "");
   const { lessons } = useClassLessons(classId || "");
@@ -128,16 +128,25 @@ export default function ClassDetailPage() {
         <TabsContent value="evaluations" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Avaliações</h2>
-            <Button
-              onClick={() =>
-                navigate(`/dashboard/classes/${classId}/evaluation-config`)
-              }
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              Configurar Avaliações
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(`/dashboard/classes/${classId}/evaluation-config`)
+                }
+              >
+                Configurar Pesos
+              </Button>
+              <Button
+                onClick={() =>
+                  navigate(`/dashboard/classes/${classId}/evaluations`)
+                }
+              >
+                Ver Página Completa
+              </Button>
+            </div>
           </div>
-          <EvaluationsList evaluations={evaluations} />
+          <EvaluationsList evaluations={evaluations} classId={classId} />
         </TabsContent>
       </Tabs>
     </div>

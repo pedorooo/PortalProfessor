@@ -72,10 +72,6 @@ describe('ClassesService', () => {
               findMany: jest.fn(),
               count: jest.fn(),
             },
-            evaluationCriterion: {
-              findMany: jest.fn(),
-              count: jest.fn(),
-            },
           },
         },
       ],
@@ -491,78 +487,6 @@ describe('ClassesService', () => {
       await expect(service.getClassEvaluations(999, 1, 10)).rejects.toThrow(
         BadRequestException,
       );
-    });
-  });
-
-  describe('getClassEvaluationCriteria', () => {
-    it('should return paginated evaluation criteria list', async () => {
-      const mockCriteria = [
-        {
-          id: 1,
-          name: 'Multiple Choice',
-          weight: 50,
-          description: 'MC Questions',
-          evaluationId: 1,
-          evaluation: {
-            name: 'Midterm Exam',
-          },
-          grades: [],
-        },
-      ];
-
-      jest
-        .spyOn(prisma.class, 'findUnique')
-        .mockResolvedValue(mockClass as any);
-      jest
-        .spyOn(prisma.evaluationCriterion, 'findMany')
-        .mockResolvedValue(mockCriteria as any);
-      jest.spyOn(prisma.evaluationCriterion, 'count').mockResolvedValue(1);
-
-      const result = await service.getClassEvaluationCriteria(1, 1, 10);
-
-      expect(prisma.class.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
-      expect(prisma.evaluationCriterion.findMany).toHaveBeenCalled();
-      expect(result.criteria).toHaveLength(1);
-      expect(result.criteria[0].name).toBe('Multiple Choice');
-      expect(result.criteria[0].evaluationName).toBe('Midterm Exam');
-      expect(result.total).toBe(1);
-    });
-
-    it('should return empty list if no criteria', async () => {
-      jest
-        .spyOn(prisma.class, 'findUnique')
-        .mockResolvedValue(mockClass as any);
-      jest.spyOn(prisma.evaluationCriterion, 'findMany').mockResolvedValue([]);
-      jest.spyOn(prisma.evaluationCriterion, 'count').mockResolvedValue(0);
-
-      const result = await service.getClassEvaluationCriteria(1, 1, 10);
-
-      expect(result.criteria).toHaveLength(0);
-      expect(result.total).toBe(0);
-    });
-
-    it('should handle pagination', async () => {
-      jest
-        .spyOn(prisma.class, 'findUnique')
-        .mockResolvedValue(mockClass as any);
-      jest.spyOn(prisma.evaluationCriterion, 'findMany').mockResolvedValue([]);
-      jest.spyOn(prisma.evaluationCriterion, 'count').mockResolvedValue(25);
-
-      const result = await service.getClassEvaluationCriteria(1, 2, 10);
-
-      expect(result.total).toBe(25);
-      expect(result.page).toBe(2);
-      expect(result.limit).toBe(10);
-    });
-
-    it('should throw error if class not found', async () => {
-      jest.spyOn(prisma.class, 'findUnique').mockResolvedValue(null);
-
-      await expect(
-        service.getClassEvaluationCriteria(999, 1, 10),
-      ).rejects.toThrow(BadRequestException);
     });
   });
 });

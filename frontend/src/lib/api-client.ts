@@ -318,6 +318,7 @@ export interface ClassEvaluation {
   name: string;
   dueDate: string;
   status: string;
+  gradeWeight: number;
 }
 
 export interface ClassEvaluationsResponse {
@@ -354,42 +355,56 @@ export async function getClassEvaluations(
 }
 
 /**
- * Class Evaluation Criteria API
+ * Update evaluation payload
  */
-export interface EvaluationCriterion {
-  id: number;
-  name: string;
-  weight: number;
-  description: string | null;
-  evaluationId: number;
-  evaluationName: string;
-}
-
-export interface ClassEvaluationCriteriaResponse {
-  data: EvaluationCriterion[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
+export interface UpdateEvaluationPayload {
+  name?: string;
+  dueDate?: string;
+  status?: string;
+  gradeWeight?: number;
 }
 
 /**
- * Get all evaluation criteria for a class
+ * Update an evaluation
  */
-export async function getClassEvaluationCriteria(
-  classId: number,
-  page: number = 1,
-  limit: number = 10
-): Promise<ClassEvaluationCriteriaResponse> {
-  const params = new URLSearchParams();
-  params.set("page", page.toString());
-  params.set("limit", limit.toString());
+export async function updateEvaluation(
+  evaluationId: number,
+  payload: UpdateEvaluationPayload
+): Promise<ClassEvaluation> {
+  return apiRequest<ClassEvaluation>(`/evaluations/${evaluationId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
 
-  return apiRequest<ClassEvaluationCriteriaResponse>(
-    `/classes/${classId}/evaluation-criteria?${params.toString()}`
-  );
+/**
+ * Create evaluation payload
+ */
+export interface CreateEvaluationPayload {
+  name: string;
+  classId: number;
+  dueDate: string;
+  gradeWeight?: number;
+  status?: "OPEN" | "CLOSED";
+}
+
+/**
+ * Create a new evaluation
+ */
+export async function createEvaluation(
+  payload: CreateEvaluationPayload
+): Promise<ClassEvaluation> {
+  return apiRequest<ClassEvaluation>("/evaluations", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Delete an evaluation
+ */
+export async function deleteEvaluation(evaluationId: number): Promise<void> {
+  return apiRequest<void>(`/evaluations/${evaluationId}`, {
+    method: "DELETE",
+  });
 }

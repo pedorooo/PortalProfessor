@@ -35,9 +35,6 @@ describe('EvaluationsService', () => {
             grade: {
               deleteMany: jest.fn(),
             },
-            evaluationCriterion: {
-              deleteMany: jest.fn(),
-            },
           },
         },
       ],
@@ -276,19 +273,12 @@ describe('EvaluationsService', () => {
         .mockResolvedValue({ count: 0 } as any);
 
       jest
-        .spyOn(prisma.evaluationCriterion, 'deleteMany')
-        .mockResolvedValue({ count: 0 } as any);
-
-      jest
         .spyOn(prisma.evaluation, 'delete')
         .mockResolvedValue(mockEvaluation as any);
 
       await service.deleteEvaluation(1);
 
       expect(prisma.evaluationSubmission.deleteMany).toHaveBeenCalledWith({
-        where: { evaluationId: 1 },
-      });
-      expect(prisma.evaluationCriterion.deleteMany).toHaveBeenCalledWith({
         where: { evaluationId: 1 },
       });
       expect(prisma.evaluation.delete).toHaveBeenCalledWith({

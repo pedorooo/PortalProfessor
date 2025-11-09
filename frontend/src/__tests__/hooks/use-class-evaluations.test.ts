@@ -106,7 +106,9 @@ describe("useClassEvaluations", () => {
     });
 
     for (const evaluation of result.current.evaluations) {
-      expect(evaluation.submitted).toBeLessThanOrEqual(evaluation.total);
+      expect(evaluation.submitted || 0).toBeLessThanOrEqual(
+        evaluation.total || 1
+      );
     }
   });
 
@@ -139,8 +141,8 @@ describe("useClassEvaluations", () => {
     });
 
     for (const evaluation of result.current.evaluations) {
-      expect(evaluation.weight).toBeGreaterThan(0);
-      expect(evaluation.weight).toBeLessThanOrEqual(100);
+      expect(evaluation.weight || 0).toBeGreaterThan(0);
+      expect(evaluation.weight || 0).toBeLessThanOrEqual(100);
     }
   });
 
@@ -154,7 +156,7 @@ describe("useClassEvaluations", () => {
     });
 
     const totalWeight = result.current.evaluations.reduce(
-      (sum, evaluation) => sum + evaluation.weight,
+      (sum, evaluation) => sum + (evaluation.weight || 0),
       0
     );
     expect(totalWeight).toBe(100);

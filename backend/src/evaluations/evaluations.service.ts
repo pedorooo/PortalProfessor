@@ -9,6 +9,7 @@ export interface EvaluationResponse {
   classId: number;
   dueDate: Date;
   status: string;
+  gradeWeight: number;
   createdAt?: Date;
 }
 
@@ -22,11 +23,33 @@ export class EvaluationsService {
   async createEvaluation(
     dto: CreateEvaluationDto,
   ): Promise<EvaluationResponse> {
+    const newWeight = dto.gradeWeight || 0;
+
+    // Get total weight of existing evaluations for this class
+    const existingEvaluations = await this.prisma.evaluation.findMany({
+      where: { classId: dto.classId },
+      select: { gradeWeight: true },
+    });
+
+    const totalExistingWeight = existingEvaluations.reduce(
+      (sum, e) => sum + (e.gradeWeight || 0),
+      0,
+    );
+
+    // Check if adding the new weight would exceed 100%
+    if (totalExistingWeight + newWeight > 100) {
+      throw new BadRequestException(
+        `Total weight cannot exceed 100%. Current total: ${totalExistingWeight}%, ` +
+          `adding ${newWeight}% would result in ${totalExistingWeight + newWeight}%`,
+      );
+    }
+
     const evaluation = await this.prisma.evaluation.create({
       data: {
         name: dto.name,
         classId: dto.classId,
         dueDate: dto.dueDate,
+        gradeWeight: newWeight,
         status: dto.status || 'OPEN',
       },
     });
@@ -112,6 +135,31 @@ export class EvaluationsService {
       throw new BadRequestException('Evaluation not found');
     }
 
+    // If gradeWeight is being updated, validate total weight
+    if (dto.gradeWeight !== undefined) {
+      // Get total weight of other evaluations in the same class
+      const otherEvaluations = await this.prisma.evaluation.findMany({
+        where: {
+          classId: evaluation.classId,
+          id: { not: evaluationId }, // Exclude current evaluation
+        },
+        select: { gradeWeight: true },
+      });
+
+      const totalOtherWeight = otherEvaluations.reduce(
+        (sum, e) => sum + (e.gradeWeight || 0),
+        0,
+      );
+
+      // Check if the new weight would exceed 100%
+      if (totalOtherWeight + dto.gradeWeight > 100) {
+        throw new BadRequestException(
+          `Total weight cannot exceed 100%. Other evaluations total: ${totalOtherWeight}%, ` +
+            `setting this to ${dto.gradeWeight}% would result in ${totalOtherWeight + dto.gradeWeight}%`,
+        );
+      }
+    }
+
     const updateData: any = {};
 
     if (dto.name !== undefined) {
@@ -124,6 +172,10 @@ export class EvaluationsService {
 
     if (dto.status !== undefined) {
       updateData.status = dto.status;
+    }
+
+    if (dto.gradeWeight !== undefined) {
+      updateData.gradeWeight = dto.gradeWeight;
     }
 
     const updatedEvaluation = await this.prisma.evaluation.update({
@@ -153,14 +205,16 @@ export class EvaluationsService {
 
     await this.prisma.grade.deleteMany({
       where: {
-        criterion: {
-          evaluationId,
+        enrollment: {
+          class: {
+            evaluations: {
+              some: {
+                id: evaluationId,
+              },
+            },
+          },
         },
       },
-    });
-
-    await this.prisma.evaluationCriterion.deleteMany({
-      where: { evaluationId },
     });
 
     await this.prisma.evaluation.delete({
@@ -178,6 +232,7 @@ export class EvaluationsService {
       classId: evaluation.classId,
       dueDate: evaluation.dueDate,
       status: evaluation.status,
+      gradeWeight: evaluation.gradeWeight,
     };
   }
 }

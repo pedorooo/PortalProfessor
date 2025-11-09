@@ -34,7 +34,6 @@ describe('ClassesController', () => {
             deleteClass: jest.fn(),
             getClassStudents: jest.fn(),
             getClassEvaluations: jest.fn(),
-            getClassEvaluationCriteria: jest.fn(),
           },
         },
       ],
@@ -539,107 +538,6 @@ describe('ClassesController', () => {
 
       await expect(
         controller.getClassEvaluations(999, { page: 1, limit: 10 }),
-      ).rejects.toThrow('Class not found');
-    });
-  });
-
-  describe('getClassEvaluationCriteria', () => {
-    it('should return paginated evaluation criteria list', async () => {
-      const mockCriteria = [
-        {
-          id: 1,
-          name: 'Multiple Choice',
-          weight: 50,
-          description: 'MC Questions',
-          evaluationId: 1,
-          evaluationName: 'Midterm Exam',
-        },
-      ];
-
-      const mockResponse = {
-        criteria: mockCriteria,
-        total: 1,
-        page: 1,
-        limit: 10,
-      };
-
-      jest
-        .spyOn(service, 'getClassEvaluationCriteria')
-        .mockResolvedValue(mockResponse as any);
-
-      const result = await controller.getClassEvaluationCriteria(1, {
-        page: 1,
-        limit: 10,
-      });
-
-      expect(service.getClassEvaluationCriteria).toHaveBeenCalledWith(1, 1, 10);
-      expect(result.data).toHaveLength(1);
-      expect(result.pagination.total).toBe(1);
-    });
-
-    it('should return empty list if no criteria', async () => {
-      const mockResponse = {
-        criteria: [],
-        total: 0,
-        page: 1,
-        limit: 10,
-      };
-
-      jest
-        .spyOn(service, 'getClassEvaluationCriteria')
-        .mockResolvedValue(mockResponse as any);
-
-      const result = await controller.getClassEvaluationCriteria(1, {
-        page: 1,
-        limit: 10,
-      });
-
-      expect(result.data).toHaveLength(0);
-      expect(result.pagination.total).toBe(0);
-    });
-
-    it('should handle pagination correctly', async () => {
-      const mockCriteria = [
-        {
-          id: 11,
-          name: 'Criteria 11',
-          weight: 30,
-          description: null,
-          evaluationId: 1,
-          evaluationName: 'Exam',
-        },
-      ];
-
-      const mockResponse = {
-        criteria: mockCriteria,
-        total: 25,
-        page: 2,
-        limit: 10,
-      };
-
-      jest
-        .spyOn(service, 'getClassEvaluationCriteria')
-        .mockResolvedValue(mockResponse as any);
-
-      const result = await controller.getClassEvaluationCriteria(1, {
-        page: 2,
-        limit: 10,
-      });
-
-      expect(service.getClassEvaluationCriteria).toHaveBeenCalledWith(1, 2, 10);
-      expect(result.pagination.page).toBe(2);
-      expect(result.pagination.pages).toBe(3);
-      expect(result.pagination.hasNextPage).toBe(true);
-      expect(result.pagination.hasPreviousPage).toBe(true);
-    });
-
-    it('should throw error if class not found', async () => {
-      jest
-        .spyOn(service, 'getClassEvaluationCriteria')
-        .mockRejectedValue(new BadRequestException('Class not found'));
-
-      await expect(
-        controller.getClassEvaluationCriteria(999, { page: 1, limit: 10 }),
       ).rejects.toThrow('Class not found');
     });
   });

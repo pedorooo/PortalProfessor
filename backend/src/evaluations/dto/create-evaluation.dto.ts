@@ -10,6 +10,12 @@ export const CreateEvaluationSchema = z.object({
     .int('Class ID must be an integer')
     .positive('Class ID must be positive'),
   dueDate: z.string().pipe(z.coerce.date()),
+  gradeWeight: z
+    .number()
+    .min(0, 'Grade weight must be at least 0')
+    .max(100, 'Grade weight must not exceed 100')
+    .default(0)
+    .optional(),
   status: z.enum(['OPEN', 'CLOSED']).default('OPEN').optional(),
 });
 

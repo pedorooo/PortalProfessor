@@ -6,31 +6,34 @@ import type { ClassEvaluation } from "@/hooks/use-class-evaluations";
 describe("EvaluationsList", () => {
   const mockEvaluations: ClassEvaluation[] = [
     {
-      id: "eval1",
+      id: 1,
       name: "Prova 1 - Álgebra",
       dueDate: "15 de outubro",
       status: "Corrigida",
       submitted: 25,
       total: 25,
       weight: 30,
+      gradeWeight: 30,
     },
     {
-      id: "eval2",
+      id: 2,
       name: "Trabalho em Grupo",
       dueDate: "20 de outubro",
       status: "Pendente",
       submitted: 20,
       total: 25,
       weight: 20,
+      gradeWeight: 20,
     },
     {
-      id: "eval3",
+      id: 3,
       name: "Projeto Final",
       dueDate: "30 de outubro",
       status: "Em Andamento",
       submitted: 10,
       total: 25,
       weight: 50,
+      gradeWeight: 50,
     },
   ];
 
@@ -132,7 +135,7 @@ describe("EvaluationsList", () => {
     const manyEvaluations: ClassEvaluation[] = Array.from(
       { length: 12 },
       (_, i) => ({
-        id: `eval${i}`,
+        id: i + 1,
         name: `Avaliação ${i + 1}`,
         dueDate: `${i + 1} de novembro`,
         status: ["Corrigida", "Pendente", "Em Andamento"][i % 3] as
@@ -142,6 +145,7 @@ describe("EvaluationsList", () => {
         submitted: Math.floor(Math.random() * 25),
         total: 25,
         weight: Math.floor(100 / 12),
+        gradeWeight: Math.floor(100 / 12),
       })
     );
 
@@ -154,13 +158,14 @@ describe("EvaluationsList", () => {
   it("deve renderizar corretamente com 0% de submissão", () => {
     const noSubmissions: ClassEvaluation[] = [
       {
-        id: "eval1",
+        id: 1,
         name: "Prova Futura",
         dueDate: "30 de dezembro",
         status: "Em Andamento",
         submitted: 0,
         total: 25,
         weight: 100,
+        gradeWeight: 100,
       },
     ];
 
@@ -172,13 +177,14 @@ describe("EvaluationsList", () => {
   it("deve renderizar corretamente com 100% de submissão", () => {
     const allSubmitted: ClassEvaluation[] = [
       {
-        id: "eval1",
+        id: 1,
         name: "Prova Completa",
         dueDate: "15 de outubro",
         status: "Corrigida",
         submitted: 30,
         total: 30,
         weight: 100,
+        gradeWeight: 100,
       },
     ];
 

@@ -12,7 +12,10 @@ export default function ClassEnrolledStudentsPage() {
   const { students: mockStudents } = useClassStudents(classId || "");
 
   // Find the class by ID
-  const classData = classes.find((cls) => cls.id === classId);
+  const classIdNumber = classId ? Number.parseInt(classId, 10) : undefined;
+  const classData = classIdNumber
+    ? classes.find((cls) => cls.id === classIdNumber)
+    : undefined;
 
   if (!classData) {
     return (
