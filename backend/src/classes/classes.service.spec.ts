@@ -54,14 +54,27 @@ describe('ClassesService', () => {
               delete: jest.fn(),
               count: jest.fn(),
             },
+            enrollment: {
+              findMany: jest.fn(),
+              count: jest.fn(),
+              deleteMany: jest.fn(),
+            },
+            student: {
+              findUnique: jest.fn(),
+            },
             studentLesson: {
               deleteMany: jest.fn(),
             },
             lesson: {
               deleteMany: jest.fn(),
             },
-            enrollment: {
-              deleteMany: jest.fn(),
+            evaluation: {
+              findMany: jest.fn(),
+              count: jest.fn(),
+            },
+            evaluationCriterion: {
+              findMany: jest.fn(),
+              count: jest.fn(),
             },
           },
         },
@@ -335,6 +348,221 @@ describe('ClassesService', () => {
       await expect(service.deleteClass(999)).rejects.toThrow(
         BadRequestException,
       );
+    });
+  });
+
+  describe('getClassStudents', () => {
+    it('should return paginated students list', async () => {
+      const mockEnrollments = [
+        {
+          id: 1,
+          studentId: 1,
+          classId: 1,
+          enrolledAt: new Date(),
+          status: 'ACTIVE',
+          gradeAverage: 8.5,
+          student: {
+            id: 1,
+            userId: 1,
+            phone: '1234567890',
+            user: {
+              id: 1,
+              name: 'John Doe',
+              email: 'john@example.com',
+            },
+          },
+        },
+      ];
+
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest
+        .spyOn(prisma.enrollment, 'findMany')
+        .mockResolvedValue(mockEnrollments as any);
+      jest.spyOn(prisma.enrollment, 'count').mockResolvedValue(1);
+
+      const result = await service.getClassStudents(1, 1, 10);
+
+      expect(prisma.class.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.enrollment.findMany).toHaveBeenCalled();
+      expect(result.students).toHaveLength(1);
+      expect(result.students[0].name).toBe('John Doe');
+      expect(result.total).toBe(1);
+    });
+
+    it('should throw error if class not found', async () => {
+      jest.spyOn(prisma.class, 'findUnique').mockResolvedValue(null);
+
+      await expect(service.getClassStudents(999, 1, 10)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should handle pagination', async () => {
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest.spyOn(prisma.enrollment, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.enrollment, 'count').mockResolvedValue(25);
+
+      const result = await service.getClassStudents(1, 2, 10);
+
+      expect(result.total).toBe(25);
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(10);
+    });
+  });
+
+  describe('getClassEvaluations', () => {
+    it('should return paginated evaluations list', async () => {
+      const mockEvaluations = [
+        {
+          id: 1,
+          name: 'Midterm Exam',
+          classId: 1,
+          dueDate: new Date('2025-12-15'),
+          status: 'OPEN',
+          criteria: [],
+          submissions: [],
+        },
+      ];
+
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest
+        .spyOn(prisma.evaluation, 'findMany')
+        .mockResolvedValue(mockEvaluations as any);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(1);
+
+      const result = await service.getClassEvaluations(1, 1, 10);
+
+      expect(prisma.class.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.evaluation.findMany).toHaveBeenCalled();
+      expect(result.evaluations).toHaveLength(1);
+      expect(result.evaluations[0].name).toBe('Midterm Exam');
+      expect(result.total).toBe(1);
+    });
+
+    it('should handle search filter', async () => {
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(0);
+
+      await service.getClassEvaluations(1, 1, 10, 'Exam');
+
+      expect(prisma.evaluation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            name: { contains: 'Exam', mode: 'insensitive' },
+          }),
+        }),
+      );
+    });
+
+    it('should handle status filter', async () => {
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest.spyOn(prisma.evaluation, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.evaluation, 'count').mockResolvedValue(0);
+
+      await service.getClassEvaluations(1, 1, 10, undefined, 'CLOSED');
+
+      expect(prisma.evaluation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: 'CLOSED',
+          }),
+        }),
+      );
+    });
+
+    it('should throw error if class not found', async () => {
+      jest.spyOn(prisma.class, 'findUnique').mockResolvedValue(null);
+
+      await expect(service.getClassEvaluations(999, 1, 10)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+  });
+
+  describe('getClassEvaluationCriteria', () => {
+    it('should return paginated evaluation criteria list', async () => {
+      const mockCriteria = [
+        {
+          id: 1,
+          name: 'Multiple Choice',
+          weight: 50,
+          description: 'MC Questions',
+          evaluationId: 1,
+          evaluation: {
+            name: 'Midterm Exam',
+          },
+          grades: [],
+        },
+      ];
+
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest
+        .spyOn(prisma.evaluationCriterion, 'findMany')
+        .mockResolvedValue(mockCriteria as any);
+      jest.spyOn(prisma.evaluationCriterion, 'count').mockResolvedValue(1);
+
+      const result = await service.getClassEvaluationCriteria(1, 1, 10);
+
+      expect(prisma.class.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+      expect(prisma.evaluationCriterion.findMany).toHaveBeenCalled();
+      expect(result.criteria).toHaveLength(1);
+      expect(result.criteria[0].name).toBe('Multiple Choice');
+      expect(result.criteria[0].evaluationName).toBe('Midterm Exam');
+      expect(result.total).toBe(1);
+    });
+
+    it('should return empty list if no criteria', async () => {
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest.spyOn(prisma.evaluationCriterion, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.evaluationCriterion, 'count').mockResolvedValue(0);
+
+      const result = await service.getClassEvaluationCriteria(1, 1, 10);
+
+      expect(result.criteria).toHaveLength(0);
+      expect(result.total).toBe(0);
+    });
+
+    it('should handle pagination', async () => {
+      jest
+        .spyOn(prisma.class, 'findUnique')
+        .mockResolvedValue(mockClass as any);
+      jest.spyOn(prisma.evaluationCriterion, 'findMany').mockResolvedValue([]);
+      jest.spyOn(prisma.evaluationCriterion, 'count').mockResolvedValue(25);
+
+      const result = await service.getClassEvaluationCriteria(1, 2, 10);
+
+      expect(result.total).toBe(25);
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(10);
+    });
+
+    it('should throw error if class not found', async () => {
+      jest.spyOn(prisma.class, 'findUnique').mockResolvedValue(null);
+
+      await expect(
+        service.getClassEvaluationCriteria(999, 1, 10),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

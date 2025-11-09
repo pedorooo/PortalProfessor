@@ -92,7 +92,8 @@ describe('EvaluationCriteriaController', () => {
       const result = await controller.getAllEvaluationCriteria('1', '1', '10');
 
       expect(service.getAllEvaluationCriteria).toHaveBeenCalledWith(1, 1, 10);
-      expect(result.data).toEqual(mockResult);
+      expect(result.data).toEqual([mockCriteria]);
+      expect(result.pagination.total).toBe(1);
     });
 
     it('should use default pagination values', async () => {
