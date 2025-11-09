@@ -20,6 +20,7 @@ export const CreateStudentSchema = z.object({
       (val) => !val || val.length >= 10,
       'Phone must be at least 10 characters if provided',
     ),
+  classId: z.number().int().positive().optional(),
 });
 
 export type CreateStudentDto = z.infer<typeof CreateStudentSchema>;

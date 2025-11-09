@@ -5,6 +5,7 @@ export interface Student {
   phone?: string;
   grade?: number;
   class: string;
+  classId?: number;
   status: "active" | "inactive";
   enrollmentDate: string;
 }

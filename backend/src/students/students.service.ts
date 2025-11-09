@@ -19,6 +19,8 @@ export interface StudentResponse {
 
 export interface StudentListResponse extends StudentResponse {
   className?: string;
+  classId?: number;
+  grade?: number;
 }
 
 @Injectable()
@@ -31,11 +33,21 @@ export class StudentsService {
   /**
    * Create a new student
    */
-  async createStudent(dto: CreateStudentDto): Promise<StudentResponse> {
+  async createStudent(dto: CreateStudentDto): Promise<StudentListResponse> {
     // Check if email already exists
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new BadRequestException('Email already exists');
+    }
+
+    // If classId is provided, verify the class exists
+    if (dto.classId) {
+      const classExists = await this.prisma.class.findUnique({
+        where: { id: dto.classId },
+      });
+      if (!classExists) {
+        throw new BadRequestException('Class not found');
+      }
     }
 
     // Create user and student records
@@ -55,7 +67,32 @@ export class StudentsService {
       },
     });
 
-    return this.formatStudentResponse(student, user);
+    // Create enrollment if classId is provided
+    let className: string | undefined;
+    let classId: number | undefined;
+
+    if (dto.classId) {
+      const enrollment = await this.prisma.enrollment.create({
+        data: {
+          studentId: student.id,
+          classId: dto.classId,
+          status: 'ACTIVE',
+          enrolledAt: new Date(),
+        },
+        include: {
+          class: true,
+        },
+      });
+      className = enrollment.class.name;
+      classId = enrollment.classId;
+    }
+
+    return {
+      ...this.formatStudentResponse(student, user),
+      className,
+      classId,
+      grade: undefined,
+    };
   }
 
   /**
@@ -116,17 +153,66 @@ export class StudentsService {
       where: whereClause,
       include: {
         user: true,
-        enrollments: true,
+        enrollments: {
+          include: {
+            class: true,
+          },
+          orderBy: {
+            enrolledAt: 'desc',
+          },
+        },
       },
       skip,
       take: limit,
       orderBy: { user: { name: 'asc' } },
     });
 
-    const formattedStudents = students.map((student) => ({
-      ...this.formatStudentResponse(student, student.user),
-      enrollmentCount: student.enrollments.length,
-    }));
+    const formattedStudents = await Promise.all(
+      students.map(async (student) => {
+        const latestEnrollment = student.enrollments[0];
+        let className: string | undefined;
+        let classId: number | undefined;
+        let grade: number | undefined;
+
+        if (latestEnrollment) {
+          className = latestEnrollment.class.name;
+          classId = latestEnrollment.class.id;
+
+          // Calculate the average grade for this student in this class
+          const evaluationSubmissions =
+            await this.prisma.evaluationSubmission.findMany({
+              where: {
+                studentId: student.id,
+                evaluation: {
+                  classId: latestEnrollment.classId,
+                },
+                grade: {
+                  not: null,
+                },
+              },
+              select: {
+                grade: true,
+              },
+            });
+
+          if (evaluationSubmissions.length > 0) {
+            const totalGrade = evaluationSubmissions.reduce(
+              (sum, sub) => sum + (sub.grade || 0),
+              0,
+            );
+            grade = totalGrade / evaluationSubmissions.length;
+          }
+        }
+
+        return {
+          ...this.formatStudentResponse(student, student.user),
+          enrollmentCount: student.enrollments.length,
+          className,
+          classId,
+          grade,
+        };
+      }),
+    );
 
     return {
       students: formattedStudents,
@@ -140,19 +226,67 @@ export class StudentsService {
   /**
    * Get a single student by ID
    */
-  async getStudentById(studentId: number): Promise<StudentResponse> {
+  async getStudentById(studentId: number): Promise<StudentListResponse> {
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
-      include: { user: true, enrollments: true },
+      include: {
+        user: true,
+        enrollments: {
+          include: {
+            class: true,
+          },
+          orderBy: {
+            enrolledAt: 'desc',
+          },
+        },
+      },
     });
 
     if (!student) {
       throw new BadRequestException('Student not found');
     }
 
+    const latestEnrollment = student.enrollments[0];
+    let className: string | undefined;
+    let classId: number | undefined;
+    let grade: number | undefined;
+
+    if (latestEnrollment) {
+      className = latestEnrollment.class.name;
+      classId = latestEnrollment.class.id;
+
+      // Calculate the average grade for this student in this class
+      const evaluationSubmissions =
+        await this.prisma.evaluationSubmission.findMany({
+          where: {
+            studentId: student.id,
+            evaluation: {
+              classId: latestEnrollment.classId,
+            },
+            grade: {
+              not: null,
+            },
+          },
+          select: {
+            grade: true,
+          },
+        });
+
+      if (evaluationSubmissions.length > 0) {
+        const totalGrade = evaluationSubmissions.reduce(
+          (sum, sub) => sum + (sub.grade || 0),
+          0,
+        );
+        grade = totalGrade / evaluationSubmissions.length;
+      }
+    }
+
     return {
       ...this.formatStudentResponse(student, student.user),
       enrollmentCount: student.enrollments.length,
+      className,
+      classId,
+      grade,
     };
   }
 
@@ -162,7 +296,7 @@ export class StudentsService {
   async updateStudent(
     studentId: number,
     dto: UpdateStudentDto,
-  ): Promise<StudentResponse> {
+  ): Promise<StudentListResponse> {
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
       include: { user: true, enrollments: true },
@@ -198,15 +332,63 @@ export class StudentsService {
       });
     }
 
-    // Fetch updated records
+    // Fetch updated records with enrollments
     const updatedStudent = await this.prisma.student.findUnique({
       where: { id: studentId },
-      include: { user: true, enrollments: true },
+      include: {
+        user: true,
+        enrollments: {
+          include: {
+            class: true,
+          },
+          orderBy: {
+            enrolledAt: 'desc',
+          },
+        },
+      },
     });
+
+    const latestEnrollment = updatedStudent!.enrollments[0];
+    let className: string | undefined;
+    let classId: number | undefined;
+    let grade: number | undefined;
+
+    if (latestEnrollment) {
+      className = latestEnrollment.class.name;
+      classId = latestEnrollment.class.id;
+
+      // Calculate the average grade for this student in this class
+      const evaluationSubmissions =
+        await this.prisma.evaluationSubmission.findMany({
+          where: {
+            studentId: updatedStudent!.id,
+            evaluation: {
+              classId: latestEnrollment.classId,
+            },
+            grade: {
+              not: null,
+            },
+          },
+          select: {
+            grade: true,
+          },
+        });
+
+      if (evaluationSubmissions.length > 0) {
+        const totalGrade = evaluationSubmissions.reduce(
+          (sum, sub) => sum + (sub.grade || 0),
+          0,
+        );
+        grade = totalGrade / evaluationSubmissions.length;
+      }
+    }
 
     return {
       ...this.formatStudentResponse(updatedStudent!, updatedStudent!.user),
       enrollmentCount: updatedStudent!.enrollments.length,
+      className,
+      classId,
+      grade,
     };
   }
 

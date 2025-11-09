@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import type { Student } from "@/types";
+import { getClasses, type ClassApiResponse } from "@/lib/api-client";
 import {
   Dialog,
   DialogContent,
@@ -29,8 +30,6 @@ interface StudentDialogProps {
   isLoading?: boolean;
 }
 
-const classes = ["Class A", "Class B", "Class C"];
-
 export function StudentDialog({
   isOpen,
   onOpenChange,
@@ -38,26 +37,53 @@ export function StudentDialog({
   student,
   isLoading,
 }: Readonly<StudentDialogProps>) {
+  const [classes, setClasses] = useState<ClassApiResponse[]>([]);
+  const [loadingClasses, setLoadingClasses] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     email: string;
+    phone?: string;
     class: string;
+    classId?: number;
     status: "active" | "inactive";
     enrollmentDate: string;
   }>({
     name: "",
     email: "",
+    phone: "",
     class: "",
+    classId: undefined,
     status: "active",
     enrollmentDate: new Date().toISOString().split("T")[0],
   });
+
+  // Load classes from API
+  useEffect(() => {
+    const loadClasses = async () => {
+      setLoadingClasses(true);
+      try {
+        const response = await getClasses(1, 100); // Get first 100 classes
+        setClasses(response.data);
+      } catch (error) {
+        console.error("Error loading classes:", error);
+      } finally {
+        setLoadingClasses(false);
+      }
+    };
+
+    if (isOpen) {
+      loadClasses();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (student) {
       setFormData({
         name: student.name,
         email: student.email,
+        phone: student.phone,
         class: student.class,
+        classId: undefined, // Will be set from API if needed
         status: student.status,
         enrollmentDate: student.enrollmentDate,
       });
@@ -65,7 +91,9 @@ export function StudentDialog({
       setFormData({
         name: "",
         email: "",
+        phone: "",
         class: "",
+        classId: undefined,
         status: "active",
         enrollmentDate: new Date().toISOString().split("T")[0],
       });
@@ -74,17 +102,42 @@ export function StudentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.class) {
+    if (!formData.name || !formData.email) {
       return;
     }
 
     if (student) {
       onSubmit({
         ...student,
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        class: formData.class,
+        classId: formData.classId,
+        status: formData.status,
+        enrollmentDate: formData.enrollmentDate,
       });
     } else {
-      onSubmit(formData);
+      onSubmit({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        class: formData.class,
+        classId: formData.classId,
+        status: formData.status,
+        enrollmentDate: formData.enrollmentDate,
+      });
+    }
+  };
+
+  const handleClassChange = (value: string) => {
+    const selectedClass = classes.find((c) => c.id.toString() === value);
+    if (selectedClass) {
+      setFormData({
+        ...formData,
+        class: selectedClass.name,
+        classId: selectedClass.id,
+      });
     }
   };
 
@@ -126,20 +179,32 @@ export function StudentDialog({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="phone">Phone (optional)</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+55 11 98765-4321"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="class">Class</Label>
             <Select
-              value={formData.class}
-              onValueChange={(value) =>
-                setFormData({ ...formData, class: value })
-              }
+              value={formData.classId?.toString() || ""}
+              onValueChange={handleClassChange}
+              disabled={loadingClasses || !!student}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a class" />
               </SelectTrigger>
               <SelectContent>
                 {classes.map((cls) => (
-                  <SelectItem key={cls} value={cls}>
-                    {cls}
+                  <SelectItem key={cls.id} value={cls.id.toString()}>
+                    {cls.name}
                   </SelectItem>
                 ))}
               </SelectContent>
