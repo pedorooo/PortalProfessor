@@ -1,3 +1,5 @@
+import { formatDateFields } from "@/lib/utils/date";
+
 /**
  * API Client Configuration
  * Centralized API configuration and request handling
@@ -349,9 +351,13 @@ export async function getClassEvaluations(
   if (search) params.set("search", search);
   if (status) params.set("status", status);
 
-  return apiRequest<ClassEvaluationsResponse>(
+  const response = await apiRequest<ClassEvaluationsResponse>(
     `/classes/${classId}/evaluations?${params.toString()}`
   );
+
+  response.data = formatDateFields(response.data);
+
+  return response;
 }
 
 /**
