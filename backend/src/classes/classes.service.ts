@@ -13,6 +13,8 @@ export interface ClassResponse {
   professorName: string;
   enrollmentCount: number;
   createdAt: Date;
+  classAverage?: number;
+  averageAttendance?: number;
 }
 
 @Injectable()
@@ -48,7 +50,7 @@ export class ClassesService {
       },
     });
 
-    return this.formatClassResponse(classRecord);
+    return await this.formatClassResponse(classRecord);
   }
 
   /**
@@ -107,8 +109,12 @@ export class ClassesService {
       orderBy: { name: 'asc' },
     });
 
+    const formattedClasses = await Promise.all(
+      classes.map((c) => this.formatClassResponse(c)),
+    );
+
     return {
-      classes: classes.map((c) => this.formatClassResponse(c)),
+      classes: formattedClasses,
       total,
       page,
       limit,
@@ -133,7 +139,7 @@ export class ClassesService {
       throw new BadRequestException('Class not found');
     }
 
-    return this.formatClassResponse(classRecord);
+    return await this.formatClassResponse(classRecord);
   }
 
   /**
@@ -185,7 +191,7 @@ export class ClassesService {
       },
     });
 
-    return this.formatClassResponse(updatedClass);
+    return await this.formatClassResponse(updatedClass);
   }
 
   /**
@@ -355,7 +361,70 @@ export class ClassesService {
   /**
    * Helper method to format class response
    */
-  private formatClassResponse(classRecord: any): ClassResponse {
+  private async formatClassResponse(classRecord: any): Promise<ClassResponse> {
+    // Calculate class average from all evaluation submissions
+    const evaluations = await this.prisma.evaluation.findMany({
+      where: { classId: classRecord.id },
+      include: {
+        submissions: true,
+      },
+    });
+
+    console.log(
+      `[ClassService] Found ${evaluations.length} evaluations for class ${classRecord.id}`,
+    );
+
+    let classAverage: number | undefined = undefined;
+    if (evaluations.length > 0) {
+      const allGrades = evaluations.flatMap((e) =>
+        e.submissions.filter((s) => s.grade !== null).map((s) => s.grade!),
+      );
+      console.log(
+        `[ClassService] Found ${allGrades.length} grades:`,
+        allGrades,
+      );
+      if (allGrades.length > 0) {
+        const sum = allGrades.reduce((acc, grade) => acc + grade, 0);
+        classAverage = sum / allGrades.length;
+        console.log(`[ClassService] Calculated class average: ${classAverage}`);
+      }
+    }
+
+    // Calculate average attendance
+    const lessons = await this.prisma.lesson.findMany({
+      where: { classId: classRecord.id },
+      include: {
+        attendances: true,
+      },
+    });
+
+    console.log(
+      `[ClassService] Found ${lessons.length} lessons for class ${classRecord.id}`,
+    );
+
+    let averageAttendance: number | undefined = undefined;
+    if (lessons.length > 0) {
+      const totalEnrollments = classRecord.enrollments?.length || 0;
+      if (totalEnrollments > 0) {
+        const totalPossibleAttendances = lessons.length * totalEnrollments;
+        const totalActualAttendances = lessons.reduce(
+          (acc, lesson) =>
+            acc +
+            lesson.attendances.filter((a) => a.attendance === true).length,
+          0,
+        );
+        averageAttendance =
+          (totalActualAttendances / totalPossibleAttendances) * 100;
+        console.log(
+          `[ClassService] Calculated average attendance: ${averageAttendance}%`,
+        );
+      }
+    }
+
+    console.log(
+      `[ClassService] Returning response with classAverage=${classAverage}, averageAttendance=${averageAttendance}`,
+    );
+
     return {
       id: classRecord.id,
       name: classRecord.name,
@@ -366,6 +435,8 @@ export class ClassesService {
       professorName: classRecord.professor.user.name,
       enrollmentCount: classRecord.enrollments?.length || 0,
       createdAt: classRecord.createdAt,
+      classAverage,
+      averageAttendance,
     };
   }
 }

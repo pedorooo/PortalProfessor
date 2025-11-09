@@ -85,6 +85,8 @@ export default function ClassDetailPage() {
         maxCapacity={classData.maxCapacity}
         enrollmentPercentage={enrollmentPercentage}
         barColor={colors.bar}
+        classAverage={classData.classAverage}
+        averageAttendance={classData.averageAttendance}
       />
 
       {/* Class Info */}
@@ -146,7 +148,7 @@ export default function ClassDetailPage() {
               </Button>
             </div>
           </div>
-          <EvaluationsList evaluations={evaluations} classId={classId} />
+          <EvaluationsList evaluations={evaluations} />
         </TabsContent>
       </Tabs>
     </div>

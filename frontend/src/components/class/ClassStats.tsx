@@ -6,6 +6,8 @@ interface ClassStatsProps {
   readonly maxCapacity: number;
   readonly enrollmentPercentage: number;
   readonly barColor: string;
+  readonly classAverage?: number;
+  readonly averageAttendance?: number;
 }
 
 export function ClassStats({
@@ -13,6 +15,8 @@ export function ClassStats({
   maxCapacity,
   enrollmentPercentage,
   barColor,
+  classAverage,
+  averageAttendance,
 }: Readonly<ClassStatsProps>) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -65,7 +69,9 @@ export function ClassStats({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-orange-500">7.8</div>
+          <div className="text-2xl font-bold text-orange-500">
+            {classAverage ? classAverage.toFixed(1) : "N/A"}
+          </div>
           <p className="text-xs text-muted-foreground mt-1">Desempenho geral</p>
         </CardContent>
       </Card>
@@ -80,7 +86,9 @@ export function ClassStats({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">92%</div>
+          <div className="text-2xl font-bold text-green-600">
+            {averageAttendance ? `${Math.round(averageAttendance)}%` : "N/A"}
+          </div>
           <p className="text-xs text-muted-foreground mt-1">Presença</p>
         </CardContent>
       </Card>

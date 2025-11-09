@@ -181,6 +181,8 @@ export interface ClassApiResponse {
   professorName: string;
   enrollmentCount: number;
   createdAt: string;
+  classAverage?: number;
+  averageAttendance?: number;
 }
 
 export interface ClassesListResponse {
