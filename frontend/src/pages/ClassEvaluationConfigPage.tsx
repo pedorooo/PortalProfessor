@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -14,6 +13,9 @@ import {
   deleteEvaluation,
 } from "@/lib/api-client";
 import type { ClassApiResponse, ClassEvaluation } from "@/lib/api-client";
+import { EvaluationWeightStatus } from "./components/EvaluationWeightStatus";
+import { EvaluationForm } from "./components/EvaluationForm";
+import { EvaluationList } from "./components/EvaluationList";
 
 export default function ClassEvaluationConfigPage() {
   const navigate = useNavigate();
@@ -336,7 +338,6 @@ export default function ClassEvaluationConfigPage() {
     (sum, e) => sum + (e.gradeWeight || 0),
     0
   );
-  const isWeightValid = totalWeight === 100;
 
   return (
     <div className="space-y-6">
@@ -360,44 +361,7 @@ export default function ClassEvaluationConfigPage() {
       </div>
 
       {/* Weight Status Alert */}
-      <Card
-        className={`border-2 ${
-          isWeightValid
-            ? "border-green-200 bg-green-50"
-            : "border-yellow-200 bg-yellow-50"
-        }`}
-      >
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3">
-            <AlertCircle
-              className={`h-5 w-5 ${
-                isWeightValid ? "text-green-600" : "text-yellow-600"
-              }`}
-            />
-            <div>
-              <p
-                className={`font-semibold ${
-                  isWeightValid ? "text-green-800" : "text-yellow-800"
-                }`}
-              >
-                {isWeightValid
-                  ? "Configuração Válida"
-                  : "Configuração Incompleta"}
-              </p>
-              <p
-                className={`text-sm ${
-                  isWeightValid ? "text-green-700" : "text-yellow-700"
-                }`}
-              >
-                Peso total: <strong>{totalWeight}%</strong> de 100%
-                {!isWeightValid && (
-                  <span> - Faltam {100 - totalWeight}% para completar</span>
-                )}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <EvaluationWeightStatus totalWeight={totalWeight} />
 
       {/* Evaluations List */}
       <Card>
@@ -415,141 +379,37 @@ export default function ClassEvaluationConfigPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Create New Evaluation Form */}
-          {showForm && (
-            <div className="border rounded-lg p-4 bg-gray-50 space-y-4">
-              <h3 className="font-semibold text-lg">Criar Nova Avaliação</h3>
-              <form onSubmit={handleCreateEvaluation} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="eval-name"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Nome da Avaliação *
-                  </label>
-                  <Input
-                    id="eval-name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Ex: Prova 1, Trabalho Final"
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="eval-date"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Data de Entrega *
-                  </label>
-                  <Input
-                    id="eval-date"
-                    type="date"
-                    value={formData.dueDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dueDate: e.target.value })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="eval-weight"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Peso (%)
-                  </label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      id="eval-weight"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.gradeWeight}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          gradeWeight: Number.parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-32"
-                    />
-                    <span className="text-sm font-semibold">%</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button type="submit" disabled={creatingEval}>
-                    {creatingEval ? "Criando..." : "Criar Avaliação"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowForm(false);
-                      setFormData({ name: "", dueDate: "", gradeWeight: 0 });
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              </form>
-            </div>
-          )}
+          <EvaluationForm
+            isOpen={showForm}
+            isLoading={creatingEval}
+            formData={formData}
+            totalExistingWeight={totalWeight}
+            onNameChange={(value) => setFormData({ ...formData, name: value })}
+            onDateChange={(value) =>
+              setFormData({ ...formData, dueDate: value })
+            }
+            onWeightChange={(value) =>
+              setFormData({
+                ...formData,
+                gradeWeight: Number.parseInt(value) || 0,
+              })
+            }
+            onSubmit={handleCreateEvaluation}
+            onCancel={() => {
+              setShowForm(false);
+              setFormData({ name: "", dueDate: "", gradeWeight: 0 });
+            }}
+          />
 
           {/* Evaluations List */}
-          {evaluations.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Nenhuma avaliação encontrada nesta turma.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {evaluations.map((evaluation) => (
-                <div
-                  key={evaluation.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold">{evaluation.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Entrega: {evaluation.dueDate}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={evaluation.gradeWeight || 0}
-                        onChange={(e) =>
-                          handleWeightChange(evaluation.id, e.target.value)
-                        }
-                        onBlur={() => handleWeightBlur(evaluation.id)}
-                        disabled={updatingId === evaluation.id}
-                        className="w-24 text-center"
-                      />
-                      <span className="text-sm font-semibold">%</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteEvaluation(evaluation.id)}
-                      disabled={deletingId === evaluation.id}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <EvaluationList
+            evaluations={evaluations}
+            updatingId={updatingId}
+            deletingId={deletingId}
+            onWeightChange={handleWeightChange}
+            onWeightBlur={handleWeightBlur}
+            onDelete={handleDeleteEvaluation}
+          />
         </CardContent>
       </Card>
 
