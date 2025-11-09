@@ -7,20 +7,33 @@ import {
   deleteClass as apiDeleteClass,
 } from "@/lib/api-client";
 
-export function useClasses() {
+interface UseClassesParams {
+  searchTerm?: string;
+  subject?: string;
+}
+
+export function useClasses(params?: UseClassesParams) {
   const [classes, setClasses] = useState<Class[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [limit] = useState(100); // Fetch all at once for simpler filtering
+  const [limit] = useState(100); // Fetch all at once
 
-  // Fetch classes on mount and when pagination changes
+  const searchTerm = params?.searchTerm || "";
+  const subject = params?.subject;
+
+  // Fetch classes with search and filters from database
   useEffect(() => {
     const fetchClasses = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await getClasses(page, limit);
+        const response = await getClasses(
+          page,
+          limit,
+          searchTerm || undefined,
+          subject && subject !== "all" ? subject : undefined
+        );
 
         // Transform API response to frontend Class type
         const transformedClasses: Class[] = response.data.map((apiClass) => ({
@@ -46,7 +59,7 @@ export function useClasses() {
     };
 
     fetchClasses();
-  }, [page, limit]);
+  }, [page, limit, searchTerm, subject]);
 
   const addClass = useCallback(async (classData: Omit<Class, "id">) => {
     try {
@@ -157,16 +170,6 @@ export function useClasses() {
     }
   }, []);
 
-  const filterClasses = useCallback(
-    (search: string) => {
-      if (!search.trim()) return classes;
-      return classes.filter((cls) =>
-        cls.name.toLowerCase().includes(search.toLowerCase())
-      );
-    },
-    [classes]
-  );
-
   return {
     classes,
     isLoading,
@@ -174,7 +177,6 @@ export function useClasses() {
     addClass,
     updateClass,
     deleteClass,
-    filterClasses,
     page,
     setPage,
   };
