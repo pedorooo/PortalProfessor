@@ -83,7 +83,7 @@ export default function ClassDetailPage() {
       await createStudent({
         name: studentData.name,
         email: studentData.email,
-        password: "Senha@123", // Senha padrão temporária
+        password: "Senha@123",
         phone: studentData.phone,
         classId: Number.parseInt(classId, 10),
         status: studentData.status.toUpperCase(),

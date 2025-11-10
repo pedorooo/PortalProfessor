@@ -74,18 +74,18 @@ export function EvaluationsList({
                   <p className="text-xs text-muted-foreground">Status</p>
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      evaluation.status === "active"
+                      evaluation.status === "OPEN"
                         ? "bg-green-100 text-green-700"
-                        : evaluation.status === "graded"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-700"
+                        : evaluation.status === "CLOSED"
+                        ? "bg-gray-100 text-gray-700"
+                        : "bg-blue-100 text-blue-700"
                     }`}
                   >
-                    {evaluation.status === "active"
-                      ? "Ativa"
-                      : evaluation.status === "graded"
-                      ? "Corrigida"
-                      : "Fechada"}
+                    {evaluation.status === "OPEN"
+                      ? "Em Andamento"
+                      : evaluation.status === "CLOSED"
+                      ? "Fechada"
+                      : evaluation.status}
                   </span>
                 </div>
               </div>
