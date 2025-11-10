@@ -121,7 +121,6 @@ export function useEvaluationManagement(classId: string | undefined) {
 
       try {
         setUpdatingId(evaluationId);
-        console.log("Atualizando peso para:", evaluationId, newWeight);
         const updatedEval = await updateEvaluation(evaluationId, {
           gradeWeight: newWeight,
         });
@@ -129,7 +128,6 @@ export function useEvaluationManagement(classId: string | undefined) {
           prev.map((e) => (e.id === evaluationId ? updatedEval : e))
         );
         toastContext.success("Peso atualizado com sucesso");
-        console.log("Peso atualizado com sucesso:", updatedEval);
       } catch (error) {
         console.error("Error updating weight:", error);
         const errorMessage =
@@ -164,11 +162,9 @@ export function useEvaluationManagement(classId: string | undefined) {
 
       try {
         setDeletingId(evaluationId);
-        console.log("Deletando avaliação:", evaluationId);
         await deleteEvaluation(evaluationId);
         setEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
         toastContext.success("Avaliação deletada com sucesso");
-        console.log("Avaliação deletada com sucesso");
       } catch (error) {
         console.error("Error deleting evaluation:", error);
         const errorMessage =
@@ -205,9 +201,7 @@ export function useEvaluationManagement(classId: string | undefined) {
       }
 
       try {
-        console.log("Criando avaliação com dados:", payload);
         const newEval = await createEvaluation(payload);
-        console.log("Avaliação criada com sucesso:", newEval);
 
         setEvaluations((prev) => [...prev, newEval]);
         toastContext.success("Avaliação criada com sucesso!");
