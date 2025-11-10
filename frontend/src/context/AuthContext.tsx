@@ -50,11 +50,8 @@ function AuthProviderInner({
         if (currentTime >= expirationTime) {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("user");
-
-          if (globalThis.location.pathname !== "/login") {
-            globalThis.location.href = "/login";
-          }
           setIsLoading(false);
+          // Não força reload - o ProtectedLayout vai redirecionar
           return;
         }
 
@@ -129,7 +126,7 @@ function AuthProviderInner({
           scheduleTokenRefresh();
         }
 
-        globalThis.location.href = "/dashboard";
+        // Não força reload - deixa o React Router lidar com a navegação
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Login failed";
@@ -151,7 +148,7 @@ function AuthProviderInner({
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     setUser(null);
-    globalThis.location.href = "/login";
+    // Não força reload - o ProtectedLayout vai redirecionar para /login
   }, []);
 
   const value = useMemo(

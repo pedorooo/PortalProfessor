@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ type TabType = "signin" | "signup";
 
 export default function LoginPage() {
   const { login, isLoading, error, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,6 +41,8 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
+      // Redireciona após login bem-sucedido
+      navigate("/dashboard");
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : "Login failed");
     }
@@ -73,6 +76,8 @@ export default function LoginPage() {
 
       // After successful registration, log them in
       await login(email, password);
+      // Redireciona após registro e login bem-sucedidos
+      navigate("/dashboard");
     } catch (err) {
       setLocalError(
         err instanceof Error ? err.message : "Falha ao criar conta"
