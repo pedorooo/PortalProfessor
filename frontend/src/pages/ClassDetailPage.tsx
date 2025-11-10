@@ -13,16 +13,22 @@ import { ClassInfo } from "@/components/class/ClassInfo";
 import { StudentsList } from "@/components/class/StudentsList";
 import { LessonsList } from "@/components/class/LessonsList";
 import { EvaluationsList } from "@/components/class/EvaluationsList";
+import { EnrollStudentDialog } from "@/components/class/EnrollStudentDialog";
 import { SUBJECT_COLORS } from "@/constants/subjects";
 import { getClassById } from "@/lib/api-client";
 import type { ClassApiResponse } from "@/lib/api/classes";
+import { createStudent } from "@/lib/api/students";
 import { useToast } from "@/context/ToastContext";
+import { Plus } from "lucide-react";
 
 export default function ClassDetailPage() {
   const navigate = useNavigate();
   const { classId } = useParams<{ classId: string }>();
   const toastContext = useToast();
   const [classData, setClassData] = useState<ClassApiResponse | null>(null);
+  const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [studentsRefreshKey, setStudentsRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchClass = async () => {
@@ -38,11 +44,55 @@ export default function ClassDetailPage() {
     };
 
     fetchClass();
-  }, [classId, toastContext]);
+  }, [classId, toastContext, studentsRefreshKey]);
 
-  const { students } = useClassStudents(classId || "");
+  const { students } = useClassStudents(classId || "", studentsRefreshKey);
   const { lessons } = useClassLessons(classId || "");
   const { evaluations } = useClassEvaluations(classId || "");
+
+  const refreshData = async () => {
+    if (!classId) return;
+    try {
+      const classIdNumber = Number.parseInt(classId, 10);
+      const data = await getClassById(classIdNumber);
+      setClassData(data);
+      setStudentsRefreshKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("Failed to refresh class:", error);
+    }
+  };
+
+  const handleEnrollStudent = async (studentData: {
+    name: string;
+    email: string;
+    phone?: string;
+    status: "active" | "inactive";
+    enrollmentDate: string;
+  }) => {
+    if (!classId) return;
+
+    setIsEnrolling(true);
+    try {
+      await createStudent({
+        name: studentData.name,
+        email: studentData.email,
+        password: "Senha@123", // Senha padrão temporária
+        phone: studentData.phone,
+        classId: Number.parseInt(classId, 10),
+        status: studentData.status.toUpperCase(),
+      });
+
+      setIsEnrollDialogOpen(false);
+      toastContext.success("Aluno matriculado com sucesso!");
+
+      await refreshData();
+    } catch (error) {
+      console.error("Error enrolling student:", error);
+      toastContext.error("Erro ao matricular aluno");
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
 
   if (!classData) {
     return (
@@ -105,11 +155,23 @@ export default function ClassDetailPage() {
         <TabsContent value="students" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Alunos Matriculados</h2>
-            <Button
-              onClick={() => navigate(`/dashboard/classes/${classId}/students`)}
-            >
-              Ver Página Completa
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsEnrollDialogOpen(true)}
+                className="gap-2 bg-purple-600 hover:bg-purple-700"
+              >
+                <Plus className="h-4 w-4" />
+                Matricular Aluno
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigate(`/dashboard/classes/${classId}/students`)
+                }
+              >
+                Ver Página Completa
+              </Button>
+            </div>
           </div>
           <StudentsList students={students} />
         </TabsContent>
@@ -152,6 +214,13 @@ export default function ClassDetailPage() {
           <EvaluationsList evaluations={evaluations} />
         </TabsContent>
       </Tabs>
+
+      <EnrollStudentDialog
+        isOpen={isEnrollDialogOpen}
+        onOpenChange={setIsEnrollDialogOpen}
+        onSubmit={handleEnrollStudent}
+        isLoading={isEnrolling}
+      />
     </div>
   );
 }

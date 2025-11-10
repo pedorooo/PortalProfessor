@@ -14,7 +14,7 @@ export interface ClassStudent {
   performance?: number;
 }
 
-export function useClassStudents(classId: string) {
+export function useClassStudents(classId: string, refreshKey?: number) {
   const [students, setStudents] = useState<ClassStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,7 @@ export function useClassStudents(classId: string) {
     if (classId) {
       fetchStudents();
     }
-  }, [classId]);
+  }, [classId, refreshKey]);
 
   return { students, loading, error };
 }
