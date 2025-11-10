@@ -2,15 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-  Menu,
-  LogOut,
-  User,
-  BookMarked,
-  BookOpen,
-  PersonStanding,
-  UserRound,
-} from "lucide-react";
+import { Menu, LogOut, User, BookOpen, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

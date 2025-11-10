@@ -5,13 +5,11 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClassStudents } from "@/hooks/use-class-students";
-import { useClassLessons } from "@/hooks/use-class-lessons";
 import { useClassEvaluations } from "@/hooks/use-class-evaluations";
 import { ClassHeader } from "@/components/class/ClassHeader";
 import { ClassStats } from "@/components/class/ClassStats";
 import { ClassInfo } from "@/components/class/ClassInfo";
 import { StudentsList } from "@/components/class/StudentsList";
-import { LessonsList } from "@/components/class/LessonsList";
 import { EvaluationsList } from "@/components/class/EvaluationsList";
 import { EnrollStudentDialog } from "@/components/class/EnrollStudentDialog";
 import { SUBJECT_COLORS } from "@/constants/subjects";
@@ -47,7 +45,6 @@ export default function ClassDetailPage() {
   }, [classId, toastContext, studentsRefreshKey]);
 
   const { students } = useClassStudents(classId || "", studentsRefreshKey);
-  const { lessons } = useClassLessons(classId || "");
   const { evaluations } = useClassEvaluations(classId || "");
 
   const refreshData = async () => {
