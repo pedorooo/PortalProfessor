@@ -317,7 +317,8 @@ async function main() {
     ]);
 
     // Matricular estudantes nas disciplinas
-    const enrollments = [];
+    const enrollments: Awaited<ReturnType<typeof prisma.enrollment.create>>[] =
+      [];
 
     // MAT101 - Todos os estudantes
     for (const student of students) {
@@ -422,7 +423,9 @@ async function main() {
     ]);
 
     // Criar submissões de avaliações
-    const submissions = [];
+    const submissions: Awaited<
+      ReturnType<typeof prisma.evaluationSubmission.create>
+    >[] = [];
 
     // Submissões para a primeira avaliação de MAT101
     for (let i = 0; i < students.length; i++) {
@@ -545,7 +548,9 @@ async function main() {
     ]);
 
     // Criar registros de presença nas aulas
-    const studentLessons = [];
+    const studentLessons: Awaited<
+      ReturnType<typeof prisma.studentLesson.create>
+    >[] = [];
 
     // Presenças para as aulas de MAT101
     for (const lesson of lessons.filter((l) => l.classId === classes[0].id)) {
@@ -580,7 +585,7 @@ async function main() {
     }
 
     // Criar notas adicionais
-    const grades = [];
+    const grades: Awaited<ReturnType<typeof prisma.grade.create>>[] = [];
     for (const enrollment of enrollments) {
       // Criar algumas notas para cada matrícula
       for (let i = 0; i < 3; i++) {
