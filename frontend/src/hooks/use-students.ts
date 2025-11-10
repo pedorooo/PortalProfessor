@@ -60,6 +60,7 @@ export function useStudents() {
         password: "password123",
         phone: student.phone,
         classId: student.classId,
+        status: student.status?.toUpperCase(),
       };
 
       const newStudent = await createStudent(payload);

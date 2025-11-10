@@ -1,4 +1,3 @@
-
 import { apiRequest } from "../api-client";
 
 export interface StudentApiResponse {
@@ -33,6 +32,7 @@ export interface CreateStudentPayload {
   password: string;
   phone?: string;
   classId?: number;
+  status?: string;
 }
 
 export interface UpdateStudentPayload {

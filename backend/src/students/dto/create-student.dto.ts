@@ -21,6 +21,12 @@ export const CreateStudentSchema = z.object({
       'Phone must be at least 10 characters if provided',
     ),
   classId: z.number().int().positive().optional(),
+  status: z
+    .enum(['ACTIVE', 'INACTIVE'], {
+      message: 'Status must be either ACTIVE or INACTIVE',
+    })
+    .optional()
+    .default('ACTIVE'),
 });
 
 export type CreateStudentDto = z.infer<typeof CreateStudentSchema>;

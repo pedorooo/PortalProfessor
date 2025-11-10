@@ -63,13 +63,17 @@ export class StudentsService {
 
     let className: string | undefined;
     let classId: number | undefined;
+    let enrollmentStatus: string | undefined;
 
     if (dto.classId) {
+      const enrollmentStatusValue =
+        dto.status === 'INACTIVE' ? 'CANCELED' : dto.status || 'ACTIVE';
+
       const enrollment = await this.prisma.enrollment.create({
         data: {
           studentId: student.id,
           classId: dto.classId,
-          status: 'ACTIVE',
+          status: enrollmentStatusValue as any,
           enrolledAt: new Date(),
         },
         include: {
@@ -78,10 +82,11 @@ export class StudentsService {
       });
       className = enrollment.class.name;
       classId = enrollment.classId;
+      enrollmentStatus = enrollment.status;
     }
 
     return {
-      ...this.formatStudentResponse(student, user),
+      ...this.formatStudentResponse(student, user, enrollmentStatus),
       className,
       classId,
       grade: undefined,
@@ -190,7 +195,11 @@ export class StudentsService {
         }
 
         return {
-          ...this.formatStudentResponse(student, student.user),
+          ...this.formatStudentResponse(
+            student,
+            student.user,
+            latestEnrollment?.status,
+          ),
           enrollmentCount: student.enrollments.length,
           className,
           classId,
@@ -263,7 +272,11 @@ export class StudentsService {
     }
 
     return {
-      ...this.formatStudentResponse(student, student.user),
+      ...this.formatStudentResponse(
+        student,
+        student.user,
+        latestEnrollment?.status,
+      ),
       enrollmentCount: student.enrollments.length,
       className,
       classId,
@@ -305,6 +318,21 @@ export class StudentsService {
       await this.prisma.student.update({
         where: { id: studentId },
         data: updateStudentData,
+      });
+    }
+
+    if (dto.status !== undefined) {
+      const enrollmentStatus =
+        dto.status === 'INACTIVE' ? 'CANCELED' : dto.status;
+
+      await this.prisma.enrollment.updateMany({
+        where: {
+          studentId: studentId,
+          status: { in: ['ACTIVE', 'COMPLETED'] },
+        },
+        data: {
+          status: enrollmentStatus as any,
+        },
       });
     }
 
@@ -358,7 +386,11 @@ export class StudentsService {
     }
 
     return {
-      ...this.formatStudentResponse(updatedStudent!, updatedStudent!.user),
+      ...this.formatStudentResponse(
+        updatedStudent!,
+        updatedStudent!.user,
+        latestEnrollment?.status,
+      ),
       enrollmentCount: updatedStudent!.enrollments.length,
       className,
       classId,
@@ -413,19 +445,27 @@ export class StudentsService {
         enrollment.student,
         enrollment.student.user,
       ),
-      status: enrollment.status,
+      status: enrollment.status === 'CANCELED' ? 'INACTIVE' : enrollment.status,
       className: '',
     }));
   }
 
-  private formatStudentResponse(student: any, user: any): StudentResponse {
+  private formatStudentResponse(
+    student: any,
+    user: any,
+    status?: string,
+  ): StudentResponse {
+    // Mapeia CANCELED para INACTIVE para manter compatibilidade com o frontend
+    const mappedStatus =
+      status === 'CANCELED' ? 'INACTIVE' : status || 'ACTIVE';
+
     return {
       id: student.id,
       userId: user.id,
       name: user.name,
       email: user.email,
       phone: student.phone || null,
-      status: 'ACTIVE',
+      status: mappedStatus,
       createdAt: student.createdAt || user.createdAt,
       enrollmentCount: 0,
     };
