@@ -131,7 +131,7 @@ describe("StudentsList", () => {
 
     render(<StudentsList students={manyStudents} />);
 
-    expect(screen.getByText("Aluno 0")).toBeInTheDocument();
-    expect(screen.getByText("Aluno 9")).toBeInTheDocument();
+    expect(screen.getByText("Aluno 1")).toBeInTheDocument();
+    expect(screen.getByText("Aluno 10")).toBeInTheDocument();
   });
 });
