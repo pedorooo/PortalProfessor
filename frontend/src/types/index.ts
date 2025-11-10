@@ -10,6 +10,12 @@ export interface Student {
   enrollmentDate: string;
 }
 
+export interface ClassSchedule {
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+}
+
 export interface Class {
   id: number;
   name: string;
@@ -26,4 +32,5 @@ export interface Class {
     | "Geografia"
     | "Inglês"
     | "Biologia";
+  schedule?: ClassSchedule[];
 }

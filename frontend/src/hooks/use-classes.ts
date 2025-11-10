@@ -72,6 +72,10 @@ export function useClasses(params?: UseClassesParams) {
         throw new Error("Subject is required");
       }
 
+      if (!classData.schedule || classData.schedule.length === 0) {
+        throw new Error("Schedule is required");
+      }
+
       const professorId =
         typeof user.id === "string" ? Number.parseInt(user.id, 10) : user.id;
 
@@ -81,6 +85,7 @@ export function useClasses(params?: UseClassesParams) {
         description: classData.description,
         maxCapacity: classData.maxCapacity,
         professorId,
+        schedule: classData.schedule,
       });
 
       const newClass: Class = {
@@ -91,6 +96,7 @@ export function useClasses(params?: UseClassesParams) {
         maxCapacity: response.maxCapacity,
         studentCount: response.enrollmentCount,
         professor: response.professorName,
+        schedule: response.schedule,
       };
 
       setClasses((prev) => [newClass, ...prev]);
@@ -116,6 +122,7 @@ export function useClasses(params?: UseClassesParams) {
           subject: updates.subject,
           description: updates.description,
           maxCapacity: updates.maxCapacity,
+          schedule: updates.schedule,
         });
 
         const updatedClass: Class = {
@@ -126,6 +133,7 @@ export function useClasses(params?: UseClassesParams) {
           maxCapacity: response.maxCapacity,
           studentCount: response.enrollmentCount,
           professor: response.professorName,
+          schedule: response.schedule,
         };
 
         setClasses((prev) =>

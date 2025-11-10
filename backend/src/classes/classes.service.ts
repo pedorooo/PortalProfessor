@@ -3,6 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { CreateClassDto } from './dto/create-class.dto';
 import type { UpdateClassDto } from './dto/update-class.dto';
 
+export interface ClassScheduleResponse {
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+}
+
 export interface ClassResponse {
   id: number;
   name: string;
@@ -15,6 +21,7 @@ export interface ClassResponse {
   createdAt: Date;
   classAverage?: number;
   averageAttendance?: number;
+  schedule?: ClassScheduleResponse[];
 }
 
 @Injectable()
@@ -38,12 +45,20 @@ export class ClassesService {
         description: dto.description || null,
         maxCapacity: dto.maxCapacity,
         professorId: professor.id,
+        schedules: {
+          create: dto.schedule.map((schedule) => ({
+            dayOfWeek: schedule.dayOfWeek,
+            startTime: new Date(`1970-01-01T${schedule.startTime}:00Z`),
+            endTime: new Date(`1970-01-01T${schedule.endTime}:00Z`),
+          })),
+        },
       },
       include: {
         professor: {
           include: { user: true },
         },
         enrollments: true,
+        schedules: true,
       },
     });
 
@@ -96,6 +111,7 @@ export class ClassesService {
           include: { user: true },
         },
         enrollments: true,
+        schedules: true,
       },
       skip,
       take: limit,
@@ -122,6 +138,7 @@ export class ClassesService {
           include: { user: true },
         },
         enrollments: true,
+        schedules: true,
       },
     });
 
@@ -166,6 +183,25 @@ export class ClassesService {
     if (dto.professorId !== undefined)
       updateData.professorId = professorInternalId;
 
+    // Handle schedule updates
+    if (dto.schedule !== undefined) {
+      // Delete existing schedules
+      await this.prisma.classSchedule.deleteMany({
+        where: { classId },
+      });
+
+      // Create new schedules if provided
+      if (dto.schedule.length > 0) {
+        updateData.schedules = {
+          create: dto.schedule.map((schedule) => ({
+            dayOfWeek: schedule.dayOfWeek,
+            startTime: new Date(`1970-01-01T${schedule.startTime}:00Z`),
+            endTime: new Date(`1970-01-01T${schedule.endTime}:00Z`),
+          })),
+        };
+      }
+    }
+
     const updatedClass = await this.prisma.class.update({
       where: { id: classId },
       data: updateData,
@@ -174,6 +210,7 @@ export class ClassesService {
           include: { user: true },
         },
         enrollments: true,
+        schedules: true,
       },
     });
 
@@ -406,6 +443,11 @@ export class ClassesService {
       createdAt: classRecord.createdAt,
       classAverage,
       averageAttendance,
+      schedule: classRecord.schedules?.map((s: any) => ({
+        dayOfWeek: s.dayOfWeek,
+        startTime: s.startTime.toISOString().substring(11, 16), // Extract HH:mm from ISO string
+        endTime: s.endTime.toISOString().substring(11, 16),
+      })),
     };
   }
 }

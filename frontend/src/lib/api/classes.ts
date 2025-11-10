@@ -1,5 +1,5 @@
-
 import { apiRequest } from "../api-client";
+import type { ClassSchedule } from "@/types";
 
 export interface ClassApiResponse {
   id: number;
@@ -13,6 +13,7 @@ export interface ClassApiResponse {
   createdAt: string;
   classAverage?: number;
   averageAttendance?: number;
+  schedule?: ClassSchedule[];
 }
 
 export interface ClassesListResponse {
@@ -33,6 +34,7 @@ export interface CreateClassPayload {
   description?: string;
   maxCapacity: number;
   professorId: number;
+  schedule: ClassSchedule[];
 }
 
 export interface UpdateClassPayload {
@@ -41,6 +43,7 @@ export interface UpdateClassPayload {
   description?: string;
   maxCapacity?: number;
   professorId?: number;
+  schedule?: ClassSchedule[];
 }
 
 export async function getClasses(
@@ -86,7 +89,6 @@ export async function deleteClass(classId: number): Promise<void> {
     method: "DELETE",
   });
 }
-
 
 export interface ClassStudent {
   id: number;

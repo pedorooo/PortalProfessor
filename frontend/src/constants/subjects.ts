@@ -62,3 +62,21 @@ export const SUBJECTS = [
   "Inglês",
   "Biologia",
 ] as const;
+
+export const DAYS_OF_WEEK = [
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+] as const;
+
+export const CLASS_TIMES = [
+  "08:00",
+  "10:00",
+  "12:00",
+  "13:00",
+  "15:00",
+  "17:00",
+] as const;

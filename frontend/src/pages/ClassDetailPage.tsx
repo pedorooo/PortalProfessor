@@ -15,7 +15,7 @@ import { LessonsList } from "@/components/class/LessonsList";
 import { EvaluationsList } from "@/components/class/EvaluationsList";
 import { SUBJECT_COLORS } from "@/constants/subjects";
 import { getClassById } from "@/lib/api-client";
-import type { ClassApiResponse } from "@/lib/api-client";
+import type { ClassApiResponse } from "@/lib/api/classes";
 import { useToast } from "@/context/ToastContext";
 
 export default function ClassDetailPage() {
@@ -88,7 +88,10 @@ export default function ClassDetailPage() {
       />
 
       {}
-      <ClassInfo professor={classData.professorName} />
+      <ClassInfo
+        professor={classData.professorName}
+        schedule={classData.schedule}
+      />
 
       {}
       <Tabs defaultValue="students" className="w-full">
