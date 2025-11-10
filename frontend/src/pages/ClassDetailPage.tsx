@@ -145,9 +145,11 @@ export default function ClassDetailPage() {
 
       {}
       <Tabs defaultValue="students" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="students">Alunos</TabsTrigger>
-          <TabsTrigger value="lessons">Aulas</TabsTrigger>
+        <TabsList className="flex w-fit rounded-full">
+          <TabsTrigger className="px-4 rounded-full" value="students">
+            Alunos
+          </TabsTrigger>
+          {/* <TabsTrigger value="lessons">Aulas</TabsTrigger> */}
           <TabsTrigger value="evaluations">Avaliações</TabsTrigger>
         </TabsList>
 
@@ -177,7 +179,7 @@ export default function ClassDetailPage() {
         </TabsContent>
 
         {}
-        <TabsContent value="lessons" className="space-y-4">
+        {/* <TabsContent value="lessons" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Aulas</h2>
             <Button
@@ -187,7 +189,7 @@ export default function ClassDetailPage() {
             </Button>
           </div>
           <LessonsList lessons={lessons} />
-        </TabsContent>
+        </TabsContent> */}
 
         {}
         <TabsContent value="evaluations" className="space-y-4">
