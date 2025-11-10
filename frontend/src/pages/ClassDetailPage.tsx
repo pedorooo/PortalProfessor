@@ -195,28 +195,15 @@ export default function ClassDetailPage() {
         <TabsContent value="evaluations" className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Avaliações</h2>
-            <div className="flex gap-2">
-              <Button
-                className="gap-2 bg-purple-600 hover:bg-purple-700 text-white hover:text-white"
-                variant="outline"
-                onClick={() =>
-                  navigate(`/dashboard/classes/${classId}/evaluation-config`)
-                }
-              >
-                <span>
-                  <Settings2 className="h-4 w-4 mr-2" />
-                </span>
-                Configurar Pesos
-              </Button>
-              <Button
-                variant={"outline"}
-                onClick={() =>
-                  navigate(`/dashboard/classes/${classId}/evaluations`)
-                }
-              >
-                Ver Página Completa
-              </Button>
-            </div>
+            <Button
+              className="gap-2 bg-purple-600 hover:bg-purple-700 text-white hover:text-white"
+              onClick={() =>
+                navigate(`/dashboard/classes/${classId}/evaluation-config`)
+              }
+            >
+              <Settings2 className="h-4 w-4" />
+              Configurar Pesos
+            </Button>
           </div>
           <EvaluationsList evaluations={evaluations} />
         </TabsContent>
