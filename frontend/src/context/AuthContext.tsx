@@ -7,7 +7,6 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { useNavigate } from "react-router-dom";
 import { login as apiLogin, logout as apiLogout } from "@/lib/api-client";
 import { useTokenRefresh } from "@/hooks/use-api";
 
@@ -33,7 +32,6 @@ function AuthProviderInner({
 }: {
   readonly children: React.ReactNode;
 }) {
-  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,12 +43,23 @@ function AuthProviderInner({
 
     if (storedToken && storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
-        try {
-          const payload = JSON.parse(atob(storedToken.split(".")[1]));
-          scheduleTokenRefresh(payload.exp * 1000);
-        } catch {
+        const payload = JSON.parse(atob(storedToken.split(".")[1]));
+        const expirationTime = payload.exp * 1000;
+        const currentTime = Date.now();
+
+        if (currentTime >= expirationTime) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("user");
+
+          if (globalThis.location.pathname !== "/login") {
+            globalThis.location.href = "/login";
+          }
+          setIsLoading(false);
+          return;
         }
+
+        setUser(JSON.parse(storedUser));
+        scheduleTokenRefresh(expirationTime);
       } catch {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
@@ -120,7 +129,7 @@ function AuthProviderInner({
           scheduleTokenRefresh();
         }
 
-        navigate("/dashboard", { replace: true });
+        globalThis.location.href = "/dashboard";
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Login failed";
@@ -130,7 +139,7 @@ function AuthProviderInner({
         setIsLoading(false);
       }
     },
-    [scheduleTokenRefresh, navigate]
+    [scheduleTokenRefresh]
   );
 
   const logout = useCallback(async () => {
@@ -142,8 +151,8 @@ function AuthProviderInner({
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     setUser(null);
-    navigate("/login", { replace: true });
-  }, [navigate]);
+    globalThis.location.href = "/login";
+  }, []);
 
   const value = useMemo(
     () => ({

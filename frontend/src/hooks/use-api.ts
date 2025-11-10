@@ -9,12 +9,20 @@ export function useTokenRefresh() {
       clearTimeout(refreshTimeoutRef.current);
     }
 
-    const timeUntilExpiry = expiresAt ? expiresAt - Date.now() : 30 * 60 * 1000;
+    if (!expiresAt) {
+      return;
+    }
 
-    const refreshDelay = Math.max(
-      Math.min(timeUntilExpiry - 5 * 60 * 1000, timeUntilExpiry),
-      60 * 1000
-    );
+    const timeUntilExpiry = expiresAt - Date.now();
+
+    if (timeUntilExpiry <= 60 * 1000) {
+      return;
+    }
+
+    const refreshDelay =
+      timeUntilExpiry > 10 * 60 * 1000
+        ? timeUntilExpiry - 5 * 60 * 1000
+        : timeUntilExpiry / 2;
 
     refreshTimeoutRef.current = setTimeout(async () => {
       try {
@@ -24,12 +32,9 @@ export function useTokenRefresh() {
         try {
           const payload = JSON.parse(atob(response.accessToken.split(".")[1]));
           scheduleTokenRefresh(payload.exp * 1000);
-        } catch {
-          scheduleTokenRefresh();
-        }
+        } catch {}
       } catch (error) {
-        console.error("Token refresh failed:", error);
-        scheduleTokenRefresh(Date.now() + 5 * 60 * 1000);
+        console.error("Falha ao renovar token:", error);
       }
     }, refreshDelay);
   }, []);
