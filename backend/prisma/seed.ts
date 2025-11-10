@@ -4,9 +4,10 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('��� Seed database');
+  console.log('🌱 Iniciando seed do banco de dados');
 
   try {
+    // Limpar dados existentes
     await prisma.evaluationSubmission.deleteMany();
     await prisma.grade.deleteMany();
     await prisma.evaluation.deleteMany();
@@ -21,379 +22,592 @@ async function main() {
     await prisma.refreshToken.deleteMany();
     await prisma.user.deleteMany();
 
-    const user1 = await prisma.user.create({
+    // Criar usuários administradores
+    const adminUser = await prisma.user.create({
       data: {
-        email: 'professor1@university.edu',
-        passwordHash: await bcrypt.hash('password123', 10),
-        name: 'Prof. Maria',
-        role: 'PROFESSOR',
+        email: 'admin@universidade.edu',
+        passwordHash: await bcrypt.hash('senha123', 10),
+        name: 'Administrador Sistema',
+        role: 'ADMIN',
       },
     });
 
-    const user2 = await prisma.user.create({
+    await prisma.admin.create({
       data: {
-        email: 'student1@university.edu',
-        passwordHash: await bcrypt.hash('password123', 10),
-        name: 'Ana Student',
-        role: 'STUDENT',
-      },
-    });
-
-    const user3 = await prisma.user.create({
-      data: {
-        email: 'student2@university.edu',
-        passwordHash: await bcrypt.hash('password123', 10),
-        name: 'João Silva',
-        role: 'STUDENT',
-      },
-    });
-
-    const user4 = await prisma.user.create({
-      data: {
-        email: 'student3@university.edu',
-        passwordHash: await bcrypt.hash('password123', 10),
-        name: 'Maria Santos',
-        role: 'STUDENT',
-      },
-    });
-
-    const user5 = await prisma.user.create({
-      data: {
-        email: 'student4@university.edu',
-        passwordHash: await bcrypt.hash('password123', 10),
-        name: 'Pedro Costa',
-        role: 'STUDENT',
-      },
-    });
-
-    const prof = await prisma.professor.create({
-      data: {
-        userId: user1.id,
+        userId: adminUser.id,
         phone: '11999999999',
       },
     });
 
-    const student1 = await prisma.student.create({
-      data: {
-        userId: user2.id,
-        phone: '11988888888',
-      },
-    });
+    // Criar professores
+    const professorUsers = await Promise.all([
+      prisma.user.create({
+        data: {
+          email: 'professor@example.com',
+          passwordHash: await bcrypt.hash('password123', 10),
+          name: 'Prof. Maria Silva',
+          role: 'PROFESSOR',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'professor.maria@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Prof. Maria Silva',
+          role: 'PROFESSOR',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'professor.carlos@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Prof. Carlos Oliveira',
+          role: 'PROFESSOR',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'professor.ana@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Prof. Ana Costa',
+          role: 'PROFESSOR',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'professor.paulo@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Prof. Paulo Santos',
+          role: 'PROFESSOR',
+        },
+      }),
+    ]);
 
-    const student2 = await prisma.student.create({
-      data: {
-        userId: user3.id,
-        phone: '11977777777',
-      },
-    });
+    const professors = await Promise.all(
+      professorUsers.map((user, index) =>
+        prisma.professor.create({
+          data: {
+            userId: user.id,
+            phone: `1198888888${index}`,
+          },
+        }),
+      ),
+    );
 
-    const student3 = await prisma.student.create({
-      data: {
-        userId: user4.id,
-        phone: '11966666666',
-      },
-    });
+    // Criar estudantes
+    const studentUsers = await Promise.all([
+      // Primeiro lote de estudantes
+      prisma.user.create({
+        data: {
+          email: 'ana.silva@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Ana Silva',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'joao.santos@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'João Santos',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'maria.oliveira@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Maria Oliveira',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'pedro.costa@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Pedro Costa',
+          role: 'STUDENT',
+        },
+      }),
+      // Mais estudantes
+      prisma.user.create({
+        data: {
+          email: 'carla.rodrigues@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Carla Rodrigues',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'lucas.fernandes@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Lucas Fernandes',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'julia.almeida@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Julia Almeida',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'rafael.martins@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Rafael Martins',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'fernanda.lima@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Fernanda Lima',
+          role: 'STUDENT',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: 'bruno.souza@universidade.edu',
+          passwordHash: await bcrypt.hash('senha123', 10),
+          name: 'Bruno Souza',
+          role: 'STUDENT',
+        },
+      }),
+    ]);
 
-    const student4 = await prisma.student.create({
-      data: {
-        userId: user5.id,
-        phone: '11955555555',
-      },
-    });
+    const students = await Promise.all(
+      studentUsers.map((user, index) =>
+        prisma.student.create({
+          data: {
+            userId: user.id,
+            phone: `1197777777${index}`,
+          },
+        }),
+      ),
+    );
 
-    const classRoom = await prisma.class.create({
-      data: {
-        name: 'Math 101',
-        subject: 'Matemática',
-        description: 'Introduction to Calculus',
-        maxCapacity: 30,
-        professorId: prof.id,
-      },
-    });
+    // Criar disciplinas
+    const classes = await Promise.all([
+      // Disciplinas do Prof. Maria
+      prisma.class.create({
+        data: {
+          name: 'MAT101',
+          subject: 'Matemática',
+          description:
+            'Cálculo Diferencial e Integral I - Introdução aos conceitos fundamentais do cálculo',
+          maxCapacity: 40,
+          professorId: professors[0].id,
+        },
+      }),
+      prisma.class.create({
+        data: {
+          name: 'MAT201',
+          subject: 'Matemática',
+          description: 'Álgebra Linear - Vetores, matrizes e sistemas lineares',
+          maxCapacity: 35,
+          professorId: professors[0].id,
+        },
+      }),
 
-    await prisma.enrollment.create({
-      data: {
-        studentId: student1.id,
-        classId: classRoom.id,
-      },
-    });
+      // Disciplinas do Prof. Carlos
+      prisma.class.create({
+        data: {
+          name: 'FIS101',
+          subject: 'Física',
+          description: 'Física Geral I - Mecânica clássica e termodinâmica',
+          maxCapacity: 45,
+          professorId: professors[1].id,
+        },
+      }),
+      prisma.class.create({
+        data: {
+          name: 'FIS201',
+          subject: 'Física',
+          description: 'Eletromagnetismo - Campos elétricos e magnéticos',
+          maxCapacity: 30,
+          professorId: professors[1].id,
+        },
+      }),
 
-    await prisma.enrollment.create({
-      data: {
-        studentId: student2.id,
-        classId: classRoom.id,
-      },
-    });
+      // Disciplinas do Prof. Ana
+      prisma.class.create({
+        data: {
+          name: 'QUI101',
+          subject: 'Química',
+          description: 'Química Geral - Estrutura atômica e ligações químicas',
+          maxCapacity: 50,
+          professorId: professors[2].id,
+        },
+      }),
 
-    await prisma.enrollment.create({
-      data: {
-        studentId: student3.id,
-        classId: classRoom.id,
-      },
-    });
+      // Disciplinas do Prof. Paulo
+      prisma.class.create({
+        data: {
+          name: 'PROG101',
+          subject: 'Programação',
+          description:
+            'Introdução à Programação - Algoritmos e lógica de programação',
+          maxCapacity: 25,
+          professorId: professors[3].id,
+        },
+      }),
+      prisma.class.create({
+        data: {
+          name: 'PROG201',
+          subject: 'Programação',
+          description: 'Estruturas de Dados - Listas, pilhas, filas e árvores',
+          maxCapacity: 20,
+          professorId: professors[3].id,
+        },
+      }),
+    ]);
 
-    await prisma.enrollment.create({
-      data: {
-        studentId: student4.id,
-        classId: classRoom.id,
-      },
-    });
+    // Criar horários das aulas
+    const classSchedules = await Promise.all([
+      // Horários para MAT101
+      prisma.classSchedule.create({
+        data: {
+          dayOfWeek: 'SEGUNDA',
+          startTime: new Date('2025-01-01T08:00:00'),
+          endTime: new Date('2025-01-01T10:00:00'),
+          classId: classes[0].id,
+        },
+      }),
+      prisma.classSchedule.create({
+        data: {
+          dayOfWeek: 'QUARTA',
+          startTime: new Date('2025-01-01T08:00:00'),
+          endTime: new Date('2025-01-01T10:00:00'),
+          classId: classes[0].id,
+        },
+      }),
 
-    const evaluation1 = await prisma.evaluation.create({
-      data: {
-        name: 'Midterm',
-        classId: classRoom.id,
-        dueDate: new Date('2025-03-15'),
-        status: 'OPEN',
-        gradeWeight: 40,
-      },
-    });
+      // Horários para MAT201
+      prisma.classSchedule.create({
+        data: {
+          dayOfWeek: 'TERCA',
+          startTime: new Date('2025-01-01T10:00:00'),
+          endTime: new Date('2025-01-01T12:00:00'),
+          classId: classes[1].id,
+        },
+      }),
 
-    const evaluation2 = await prisma.evaluation.create({
-      data: {
-        name: 'Final',
-        classId: classRoom.id,
-        dueDate: new Date('2025-05-20'),
-        status: 'OPEN',
-        gradeWeight: 60,
-      },
-    });
+      // Horários para FIS101
+      prisma.classSchedule.create({
+        data: {
+          dayOfWeek: 'SEGUNDA',
+          startTime: new Date('2025-01-01T14:00:00'),
+          endTime: new Date('2025-01-01T16:00:00'),
+          classId: classes[2].id,
+        },
+      }),
+      prisma.classSchedule.create({
+        data: {
+          dayOfWeek: 'QUINTA',
+          startTime: new Date('2025-01-01T14:00:00'),
+          endTime: new Date('2025-01-01T16:00:00'),
+          classId: classes[2].id,
+        },
+      }),
+    ]);
 
-    await prisma.evaluationSubmission.create({
-      data: {
-        studentId: student1.id,
-        evaluationId: evaluation1.id,
-        grade: 8.5,
-        submittedAt: new Date('2025-03-14'),
-        feedback: 'Excelente trabalho!',
-      },
-    });
+    // Matricular estudantes nas disciplinas
+    const enrollments = [];
 
-    await prisma.evaluationSubmission.create({
-      data: {
-        studentId: student2.id,
-        evaluationId: evaluation1.id,
-        grade: 7,
-        submittedAt: new Date('2025-03-14'),
-        feedback: 'Bom trabalho.',
-      },
-    });
+    // MAT101 - Todos os estudantes
+    for (const student of students) {
+      enrollments.push(
+        await prisma.enrollment.create({
+          data: {
+            studentId: student.id,
+            classId: classes[0].id,
+          },
+        }),
+      );
+    }
 
-    await prisma.evaluationSubmission.create({
-      data: {
-        studentId: student3.id,
-        evaluationId: evaluation1.id,
-        grade: 9,
-        submittedAt: new Date('2025-03-15'),
-        feedback: 'Muito bom!',
-      },
-    });
+    // MAT201 - Primeiros 5 estudantes
+    for (let i = 0; i < 5; i++) {
+      enrollments.push(
+        await prisma.enrollment.create({
+          data: {
+            studentId: students[i].id,
+            classId: classes[1].id,
+          },
+        }),
+      );
+    }
 
-    await prisma.evaluationSubmission.create({
-      data: {
-        studentId: student4.id,
-        evaluationId: evaluation1.id,
-        grade: 6.5,
-        submittedAt: new Date('2025-03-15'),
-        feedback: 'Precisa melhorar alguns conceitos.',
-      },
-    });
+    // FIS101 - Últimos 5 estudantes
+    for (let i = 5; i < students.length; i++) {
+      enrollments.push(
+        await prisma.enrollment.create({
+          data: {
+            studentId: students[i].id,
+            classId: classes[2].id,
+          },
+        }),
+      );
+    }
 
-    await prisma.evaluationSubmission.create({
-      data: {
-        studentId: student1.id,
-        evaluationId: evaluation2.id,
-        grade: 9.5,
-        submittedAt: new Date('2025-05-19'),
-        feedback: 'Excelente progresso!',
-      },
-    });
+    // FIS201 - Estudantes selecionados
+    for (let i = 2; i < 7; i++) {
+      enrollments.push(
+        await prisma.enrollment.create({
+          data: {
+            studentId: students[i].id,
+            classId: classes[3].id,
+          },
+        }),
+      );
+    }
 
-    await prisma.evaluationSubmission.create({
-      data: {
-        studentId: student2.id,
-        evaluationId: evaluation2.id,
-        grade: 8,
-        submittedAt: new Date('2025-05-19'),
-        feedback: 'Muito bom!',
-      },
-    });
+    // Criar avaliações
+    const evaluations = await Promise.all([
+      // Avaliações para MAT101
+      prisma.evaluation.create({
+        data: {
+          name: 'Prova 1 - Limites e Derivadas',
+          classId: classes[0].id,
+          dueDate: new Date('2025-03-15'),
+          status: 'OPEN',
+          gradeWeight: 30,
+        },
+      }),
+      prisma.evaluation.create({
+        data: {
+          name: 'Prova 2 - Integrais',
+          classId: classes[0].id,
+          dueDate: new Date('2025-05-20'),
+          status: 'OPEN',
+          gradeWeight: 40,
+        },
+      }),
+      prisma.evaluation.create({
+        data: {
+          name: 'Trabalho Prático',
+          classId: classes[0].id,
+          dueDate: new Date('2025-04-10'),
+          status: 'CLOSED',
+          gradeWeight: 30,
+        },
+      }),
 
-    const lesson1 = await prisma.lesson.create({
-      data: {
-        topic: 'Introduction to Calculus',
-        date: new Date('2025-02-10'),
-        status: 'COMPLETED',
-        duration: 90,
-        content: 'Basic concepts of derivatives',
-        classId: classRoom.id,
-      },
-    });
+      // Avaliações para MAT201
+      prisma.evaluation.create({
+        data: {
+          name: 'Prova 1 - Vetores',
+          classId: classes[1].id,
+          dueDate: new Date('2025-03-20'),
+          status: 'OPEN',
+          gradeWeight: 35,
+        },
+      }),
 
-    const lesson2 = await prisma.lesson.create({
-      data: {
-        topic: 'Limits and Continuity',
-        date: new Date('2025-02-15'),
-        status: 'COMPLETED',
-        duration: 90,
-        content: 'Understanding limits',
-        classId: classRoom.id,
-      },
-    });
+      // Avaliações para FIS101
+      prisma.evaluation.create({
+        data: {
+          name: 'Prova 1 - Mecânica',
+          classId: classes[2].id,
+          dueDate: new Date('2025-03-10'),
+          status: 'CLOSED',
+          gradeWeight: 50,
+        },
+      }),
+    ]);
 
-    const lesson3 = await prisma.lesson.create({
-      data: {
-        topic: 'Derivatives',
-        date: new Date('2025-02-20'),
-        status: 'COMPLETED',
-        duration: 90,
-        content: 'Derivative rules and applications',
-        classId: classRoom.id,
-      },
-    });
+    // Criar submissões de avaliações
+    const submissions = [];
 
-    const lesson4 = await prisma.lesson.create({
-      data: {
-        topic: 'Integration',
-        date: new Date('2025-02-25'),
-        status: 'COMPLETED',
-        duration: 90,
-        content: 'Basic integration techniques',
-        classId: classRoom.id,
-      },
-    });
+    // Submissões para a primeira avaliação de MAT101
+    for (let i = 0; i < students.length; i++) {
+      const grade = 5 + Math.random() * 5; // Notas entre 5 e 10
+      submissions.push(
+        await prisma.evaluationSubmission.create({
+          data: {
+            studentId: students[i].id,
+            evaluationId: evaluations[0].id,
+            grade: parseFloat(grade.toFixed(1)),
+            submittedAt: new Date('2025-03-14'),
+            feedback:
+              i % 3 === 0
+                ? 'Excelente trabalho!'
+                : i % 3 === 1
+                  ? 'Bom trabalho, continue assim!'
+                  : 'Precisa melhorar alguns conceitos.',
+          },
+        }),
+      );
+    }
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student1.id,
-        lessonId: lesson1.id,
-        attendance: true,
-      },
-    });
+    // Submissões para a segunda avaliação de MAT101 (alguns estudantes)
+    for (let i = 0; i < 6; i++) {
+      const grade = 6 + Math.random() * 4;
+      submissions.push(
+        await prisma.evaluationSubmission.create({
+          data: {
+            studentId: students[i].id,
+            evaluationId: evaluations[1].id,
+            grade: parseFloat(grade.toFixed(1)),
+            submittedAt: new Date('2025-05-19'),
+            feedback: 'Trabalho bem desenvolvido.',
+          },
+        }),
+      );
+    }
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student2.id,
-        lessonId: lesson1.id,
-        attendance: true,
-      },
-    });
+    // Criar aulas
+    const lessons = await Promise.all([
+      // Aulas para MAT101
+      prisma.lesson.create({
+        data: {
+          topic: 'Introdução ao Cálculo',
+          date: new Date('2025-02-10'),
+          status: 'COMPLETED',
+          duration: 120,
+          content:
+            'Conceitos básicos de limites e continuidade. História do cálculo e aplicações práticas.',
+          classId: classes[0].id,
+        },
+      }),
+      prisma.lesson.create({
+        data: {
+          topic: 'Derivadas - Parte 1',
+          date: new Date('2025-02-17'),
+          status: 'COMPLETED',
+          duration: 120,
+          content:
+            'Definição de derivada. Regras básicas de derivação. Derivada de funções polinomiais.',
+          classId: classes[0].id,
+        },
+      }),
+      prisma.lesson.create({
+        data: {
+          topic: 'Derivadas - Parte 2',
+          date: new Date('2025-02-24'),
+          status: 'COMPLETED',
+          duration: 120,
+          content:
+            'Regra da cadeia. Derivadas de funções trigonométricas e exponenciais.',
+          classId: classes[0].id,
+        },
+      }),
+      prisma.lesson.create({
+        data: {
+          topic: 'Aplicações de Derivadas',
+          date: new Date('2025-03-03'),
+          status: 'COMPLETED',
+          duration: 120,
+          content:
+            'Máximos e mínimos. Taxas relacionadas. Problemas de otimização.',
+          classId: classes[0].id,
+        },
+      }),
+      prisma.lesson.create({
+        data: {
+          topic: 'Introdução às Integrais',
+          date: new Date('2025-04-07'),
+          status: 'PLANNED',
+          duration: 120,
+          content: 'Integrais indefinidas. Técnicas básicas de integração.',
+          classId: classes[0].id,
+        },
+      }),
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student3.id,
-        lessonId: lesson1.id,
-        attendance: true,
-      },
-    });
+      // Aulas para MAT201
+      prisma.lesson.create({
+        data: {
+          topic: 'Introdução à Álgebra Linear',
+          date: new Date('2025-02-12'),
+          status: 'COMPLETED',
+          duration: 90,
+          content: 'Vetores no plano e no espaço. Operações com vetores.',
+          classId: classes[1].id,
+        },
+      }),
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student4.id,
-        lessonId: lesson1.id,
-        attendance: true,
-      },
-    });
+      // Aulas para FIS101
+      prisma.lesson.create({
+        data: {
+          topic: 'Cinemática',
+          date: new Date('2025-02-11'),
+          status: 'COMPLETED',
+          duration: 90,
+          content: 'Movimento retilíneo uniforme e uniformemente variado.',
+          classId: classes[2].id,
+        },
+      }),
+    ]);
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student1.id,
-        lessonId: lesson2.id,
-        attendance: true,
-      },
-    });
+    // Criar registros de presença nas aulas
+    const studentLessons = [];
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student2.id,
-        lessonId: lesson2.id,
-        attendance: true,
-      },
-    });
+    // Presenças para as aulas de MAT101
+    for (const lesson of lessons.filter((l) => l.classId === classes[0].id)) {
+      for (const student of students) {
+        const attendance = Math.random() > 0.15;
+        studentLessons.push(
+          await prisma.studentLesson.create({
+            data: {
+              studentId: student.id,
+              lessonId: lesson.id,
+              attendance,
+            },
+          }),
+        );
+      }
+    }
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student3.id,
-        lessonId: lesson2.id,
-        attendance: false,
-      },
-    });
+    // Presenças para outras aulas (amostra menor)
+    for (let i = 5; i < lessons.length; i++) {
+      for (let j = 0; j < 5; j++) {
+        const attendance = Math.random() > 0.2;
+        studentLessons.push(
+          await prisma.studentLesson.create({
+            data: {
+              studentId: students[j].id,
+              lessonId: lessons[i].id,
+              attendance,
+            },
+          }),
+        );
+      }
+    }
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student4.id,
-        lessonId: lesson2.id,
-        attendance: true,
-      },
-    });
+    // Criar notas adicionais
+    const grades = [];
+    for (const enrollment of enrollments) {
+      // Criar algumas notas para cada matrícula
+      for (let i = 0; i < 3; i++) {
+        const value = 4 + Math.random() * 6;
+        grades.push(
+          await prisma.grade.create({
+            data: {
+              enrollmentId: enrollment.id,
+              value: parseFloat(value.toFixed(1)),
+            },
+          }),
+        );
+      }
+    }
 
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student1.id,
-        lessonId: lesson3.id,
-        attendance: true,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student2.id,
-        lessonId: lesson3.id,
-        attendance: true,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student3.id,
-        lessonId: lesson3.id,
-        attendance: true,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student4.id,
-        lessonId: lesson3.id,
-        attendance: true,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student1.id,
-        lessonId: lesson4.id,
-        attendance: true,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student2.id,
-        lessonId: lesson4.id,
-        attendance: false,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student3.id,
-        lessonId: lesson4.id,
-        attendance: true,
-      },
-    });
-
-    await prisma.studentLesson.create({
-      data: {
-        studentId: student4.id,
-        lessonId: lesson4.id,
-        attendance: false,
-      },
-    });
-
-    console.log('✅ Seed completed!');
+    console.log('✅ Seed concluído com sucesso!');
+    console.log(`📊 Estatísticas:`);
+    console.log(`   👨‍🏫 Professores: ${professors.length}`);
+    console.log(`   👨‍🎓 Estudantes: ${students.length}`);
+    console.log(`   📚 Disciplinas: ${classes.length}`);
+    console.log(`   🗓️  Aulas: ${lessons.length}`);
+    console.log(`   📝 Avaliações: ${evaluations.length}`);
+    console.log(`   📋 Matrículas: ${enrollments.length}`);
+    console.log(`   📄 Submissões: ${submissions.length}`);
+    console.log(`   ✅ Presenças: ${studentLessons.length}`);
   } catch (error) {
-    console.error('❌ Seed error:', error);
+    console.error('❌ Erro no seed:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
