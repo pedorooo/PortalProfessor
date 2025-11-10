@@ -53,7 +53,7 @@ export class AuthController {
       payload.email,
       payload.password,
       payload.name,
-      payload.role,
+      'PROFESSOR',
     );
     return { status: 'ok', user };
   }
