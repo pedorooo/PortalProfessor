@@ -1,94 +1,183 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { Class } from "@/types";
+import {
+  getClasses,
+  createClass as apiCreateClass,
+  updateClass as apiUpdateClass,
+  deleteClass as apiDeleteClass,
+} from "@/lib/api-client";
 
-const mockClasses: Class[] = [
-  {
-    id: "1",
-    name: "Matemática Avançada",
-    maxCapacity: 30,
-    studentCount: 28,
-    professor: "Dr. Smith",
-    subject: "Matemática",
-    description: "Tópicos avançados em álgebra, geometria e cálculo",
-  },
-  {
-    id: "2",
-    name: "Fundamentos de Física",
-    maxCapacity: 35,
-    studentCount: 32,
-    professor: "Prof. Johnson",
-    subject: "Física",
-    description: "Introdução à mecânica e termodinâmica",
-  },
-  {
-    id: "3",
-    name: "Laboratório de Química",
-    maxCapacity: 25,
-    studentCount: 22,
-    professor: "Dr. Williams",
-    subject: "Química",
-    description: "Experimentos práticos de laboratório e reações químicas",
-  },
-  {
-    id: "4",
-    name: "Literatura em Inglês",
-    maxCapacity: 40,
-    studentCount: 38,
-    professor: "Ms. Brown",
-    subject: "Inglês",
-    description: "Explore a literatura inglesa clássica e contemporânea",
-  },
-];
+interface UseClassesParams {
+  searchTerm?: string;
+  subject?: string;
+}
 
-export function useClasses() {
-  const [classes, setClasses] = useState<Class[]>(mockClasses);
-  const [isLoading, setIsLoading] = useState(false);
+export function useClasses(params?: UseClassesParams) {
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(100);
 
-  const addClass = useCallback((classData: Omit<Class, "id">) => {
-    setIsLoading(true);
-    setTimeout(() => {
+  const searchTerm = params?.searchTerm || "";
+  const subject = params?.subject;
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await getClasses(
+          page,
+          limit,
+          searchTerm || undefined,
+          subject && subject !== "all" ? subject : undefined
+        );
+
+        const transformedClasses: Class[] = response.data.map((apiClass) => ({
+          id: apiClass.id,
+          name: apiClass.name,
+          subject: apiClass.subject as Class["subject"],
+          description: apiClass.description || undefined,
+          maxCapacity: apiClass.maxCapacity,
+          studentCount: apiClass.enrollmentCount,
+          professor: apiClass.professorName,
+        }));
+
+        setClasses(transformedClasses);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch classes";
+        setError(errorMessage);
+        console.error("Error fetching classes:", err);
+        setClasses([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchClasses();
+  }, [page, limit, searchTerm, subject]);
+
+  const addClass = useCallback(async (classData: Omit<Class, "id">) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const userStr = localStorage.getItem("user");
+      if (!userStr) throw new Error("User not authenticated");
+      const user = JSON.parse(userStr);
+
+      if (!classData.subject) {
+        throw new Error("Subject is required");
+      }
+
+      if (!classData.schedule || classData.schedule.length === 0) {
+        throw new Error("Schedule is required");
+      }
+
+      const professorId =
+        typeof user.id === "string" ? Number.parseInt(user.id, 10) : user.id;
+
+      const response = await apiCreateClass({
+        name: classData.name,
+        subject: classData.subject,
+        description: classData.description,
+        maxCapacity: classData.maxCapacity,
+        professorId,
+        schedule: classData.schedule,
+      });
+
       const newClass: Class = {
-        ...classData,
-        id: Date.now().toString(),
+        id: response.id,
+        name: response.name,
+        subject: response.subject as Class["subject"],
+        description: response.description || undefined,
+        maxCapacity: response.maxCapacity,
+        studentCount: response.enrollmentCount,
+        professor: response.professorName,
+        schedule: response.schedule,
       };
+
       setClasses((prev) => [newClass, ...prev]);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create class";
+      setError(errorMessage);
+      throw err;
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   }, []);
 
-  const updateClass = useCallback((id: string, updates: Partial<Class>) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setClasses((prev) =>
-        prev.map((cls) => (cls.id === id ? { ...cls, ...updates } : cls))
-      );
-      setIsLoading(false);
-    }, 500);
-  }, []);
+  const updateClass = useCallback(
+    async (id: number, updates: Partial<Class>) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  const deleteClass = useCallback((id: string) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setClasses((prev) => prev.filter((cls) => cls.id !== id));
-      setIsLoading(false);
-    }, 500);
-  }, []);
+        const classId = id;
+        const response = await apiUpdateClass(classId, {
+          name: updates.name,
+          subject: updates.subject,
+          description: updates.description,
+          maxCapacity: updates.maxCapacity,
+          schedule: updates.schedule,
+        });
 
-  const filterClasses = useCallback(
-    (search: string) => {
-      return classes.filter((cls) =>
-        cls.name.toLowerCase().includes(search.toLowerCase())
-      );
+        const updatedClass: Class = {
+          id: response.id,
+          name: response.name,
+          subject: response.subject as Class["subject"],
+          description: response.description || undefined,
+          maxCapacity: response.maxCapacity,
+          studentCount: response.enrollmentCount,
+          professor: response.professorName,
+          schedule: response.schedule,
+        };
+
+        setClasses((prev) =>
+          prev.map((cls) => (cls.id === id ? updatedClass : cls))
+        );
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to update class";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [classes]
+    []
   );
+
+  const deleteClass = useCallback(async (id: number) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const classId = id;
+      await apiDeleteClass(classId);
+
+      setClasses((prev) => prev.filter((cls) => cls.id !== id));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete class";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return {
     classes,
     isLoading,
+    error,
     addClass,
     updateClass,
     deleteClass,
-    filterClasses,
+    page,
+    setPage,
   };
 }

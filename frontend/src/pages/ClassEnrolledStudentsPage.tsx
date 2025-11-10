@@ -2,17 +2,28 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { PageLoader } from "@/components/ui/page-loader";
 import { useClasses } from "@/hooks/use-classes";
 import { useClassStudents } from "@/hooks/use-class-students";
 
 export default function ClassEnrolledStudentsPage() {
   const navigate = useNavigate();
   const { classId } = useParams<{ classId: string }>();
-  const { classes } = useClasses();
-  const { students: mockStudents } = useClassStudents(classId || "");
+  const { classes, isLoading: classesLoading } = useClasses();
+  const { students: mockStudents, loading: studentsLoading } = useClassStudents(
+    classId || ""
+  );
 
-  // Find the class by ID
-  const classData = classes.find((cls) => cls.id === classId);
+  const classIdNumber = classId ? Number.parseInt(classId, 10) : undefined;
+  const classData = classIdNumber
+    ? classes.find((cls) => cls.id === classIdNumber)
+    : undefined;
+
+  const isLoading = classesLoading || studentsLoading;
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
 
   if (!classData) {
     return (
@@ -26,7 +37,7 @@ export default function ClassEnrolledStudentsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {}
       <div>
         <Button
           variant="ghost"
@@ -43,7 +54,7 @@ export default function ClassEnrolledStudentsPage() {
         </div>
       </div>
 
-      {/* Students List */}
+      {}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Lista de Alunos</h2>
@@ -62,15 +73,17 @@ export default function ClassEnrolledStudentsPage() {
                       <Mail className="h-4 w-4" />
                       {student.email}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Phone className="h-4 w-4" />
-                      {student.phone}
-                    </div>
+                    {student.phone && (
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-4 w-4" />
+                        {student.phone}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex gap-8 text-right">
-                  <div>
+                  {/* <div>
                     <p className="text-xs text-muted-foreground">Média</p>
                     <p className="text-lg font-bold text-orange-500">
                       {student.grade}
@@ -90,7 +103,7 @@ export default function ClassEnrolledStudentsPage() {
                         style={{ width: `${student.performance}%` }}
                       />
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}

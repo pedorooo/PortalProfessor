@@ -5,12 +5,19 @@ export interface Student {
   phone?: string;
   grade?: number;
   class: string;
+  classId?: number;
   status: "active" | "inactive";
   enrollmentDate: string;
 }
 
+export interface ClassSchedule {
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+}
+
 export interface Class {
-  id: string;
+  id: number;
   name: string;
   maxCapacity: number;
   studentCount: number;
@@ -25,4 +32,5 @@ export interface Class {
     | "Geografia"
     | "Inglês"
     | "Biologia";
+  schedule?: ClassSchedule[];
 }

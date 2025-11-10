@@ -156,59 +156,12 @@ describe("useClasses hook", () => {
     });
   });
 
-  describe("filterClasses", () => {
-    it("should filter classes by name", () => {
-      const { result } = renderHook(() => useClasses());
-
-      const filtered = result.current.filterClasses("Matemática");
-
-      expect(filtered).toHaveLength(1);
-      expect(filtered[0].name).toBe("Matemática Avançada");
-    });
-
-    it("should perform case-insensitive search", () => {
-      const { result } = renderHook(() => useClasses());
-
-      const filteredLower = result.current.filterClasses("física");
-      const filteredUpper = result.current.filterClasses("FÍSICA");
-
-      expect(filteredLower).toHaveLength(1);
-      expect(filteredUpper).toHaveLength(1);
-      expect(filteredLower[0].name).toBe("Fundamentos de Física");
-    });
-
-    it("should return all classes when search is empty", () => {
-      const { result } = renderHook(() => useClasses());
-
-      const filtered = result.current.filterClasses("");
-
-      expect(filtered).toHaveLength(result.current.classes.length);
-    });
-
-    it("should return empty array when no matches found", () => {
-      const { result } = renderHook(() => useClasses());
-
-      const filtered = result.current.filterClasses("NonexistentClass");
-
-      expect(filtered).toHaveLength(0);
-    });
-
-    it("should filter by partial name match", () => {
-      const { result } = renderHook(() => useClasses());
-
-      const filtered = result.current.filterClasses("Lab");
-
-      expect(filtered).toHaveLength(1);
-      expect(filtered[0].name).toContain("Lab");
-    });
-  });
-
   describe("multiple operations", () => {
     it("should handle add and then delete", async () => {
       const { result } = renderHook(() => useClasses());
 
       const initialCount = result.current.classes.length;
-      let newClassId: string;
+      let newClassId: number;
 
       act(() => {
         result.current.addClass({
@@ -239,10 +192,10 @@ describe("useClasses hook", () => {
       expect(result.current.classes).toHaveLength(initialCount);
     });
 
-    it("should handle add, update, and filter", async () => {
+    it("should handle add and update", async () => {
       const { result } = renderHook(() => useClasses());
 
-      let newClassId: string;
+      let newClassId: number;
 
       act(() => {
         result.current.addClass({
@@ -271,10 +224,7 @@ describe("useClasses hook", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const filtered = result.current.filterClasses("Python");
-
-      expect(filtered).toHaveLength(1);
-      expect(filtered[0].studentCount).toBe(20);
+      expect(result.current.classes[0].studentCount).toBe(20);
     });
   });
 });

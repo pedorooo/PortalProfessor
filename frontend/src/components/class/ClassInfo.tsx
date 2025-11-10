@@ -1,11 +1,22 @@
 import { Clock, Users } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import type { ClassSchedule } from "@/types";
 
 interface ClassInfoProps {
   readonly professor: string;
+  readonly schedule?: ClassSchedule[];
 }
 
-export function ClassInfo({ professor }: ClassInfoProps) {
+export function ClassInfo({ professor, schedule }: ClassInfoProps) {
+  const groupedSchedules = schedule?.reduce((acc, sched) => {
+    const timeKey = `${sched.startTime} - ${sched.endTime}`;
+    if (!acc[timeKey]) {
+      acc[timeKey] = [];
+    }
+    acc[timeKey].push(sched.dayOfWeek);
+    return acc;
+  }, {} as Record<string, string[]>);
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
@@ -16,8 +27,18 @@ export function ClassInfo({ professor }: ClassInfoProps) {
           </h3>
         </CardHeader>
         <CardContent>
-          <p className="text-lg font-medium">Seg/Qua/Sex</p>
-          <p className="text-2xl font-bold text-purple-600">08:00 - 09:30</p>
+          {groupedSchedules && Object.keys(groupedSchedules).length > 0 ? (
+            Object.entries(groupedSchedules).map(([timeRange, days]) => (
+              <div key={timeRange} className="mb-2 last:mb-0">
+                <p className="text-lg font-medium">{days.join("/")}</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {timeRange}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground">Nenhum horário definido</p>
+          )}
         </CardContent>
       </Card>
 

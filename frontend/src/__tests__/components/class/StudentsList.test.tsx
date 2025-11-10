@@ -6,28 +6,37 @@ import type { ClassStudent } from "@/hooks/use-class-students";
 describe("StudentsList", () => {
   const mockStudents: ClassStudent[] = [
     {
-      id: "1",
+      id: 1,
+      userId: 101,
       name: "João Silva",
       email: "joao@university.edu",
       phone: "+55 (11) 98765-4321",
+      status: "ACTIVE",
+      enrolledAt: "2024-01-15",
       grade: 8.5,
       attendance: 95,
       performance: 92,
     },
     {
-      id: "2",
+      id: 2,
+      userId: 102,
       name: "Maria Santos",
       email: "maria@university.edu",
       phone: "+55 (11) 98765-4322",
+      status: "ACTIVE",
+      enrolledAt: "2024-01-15",
       grade: 7.2,
       attendance: 85,
       performance: 78,
     },
     {
-      id: "3",
+      id: 3,
+      userId: 103,
       name: "Pedro Oliveira",
       email: "pedro@university.edu",
       phone: "+55 (11) 98765-4323",
+      status: "ACTIVE",
+      enrolledAt: "2024-01-15",
       grade: 6.5,
       attendance: 70,
       performance: 65,
@@ -96,13 +105,10 @@ describe("StudentsList", () => {
   it("deve aplicar classes de estilo corretas aos cards", () => {
     render(<StudentsList students={mockStudents} />);
 
-    // Verifica se cada aluno tem um card renderizado
-    // pelo menos verificando se os nomes estão presentes
     for (const student of mockStudents) {
       const nameElement = screen.getByText(student.name);
       expect(nameElement).toBeInTheDocument();
 
-      // Verifica se está dentro de um elemento com as classes apropriadas
       const cardDiv = nameElement.closest("div.flex");
       expect(cardDiv).toHaveClass("items-start");
       expect(cardDiv).toHaveClass("justify-between");
@@ -111,10 +117,13 @@ describe("StudentsList", () => {
 
   it("deve renderizar com números diferentes de alunos", () => {
     const manyStudents: ClassStudent[] = Array.from({ length: 10 }, (_, i) => ({
-      id: `${i}`,
-      name: `Aluno ${i}`,
-      email: `aluno${i}@university.edu`,
+      id: i + 1,
+      userId: 200 + i,
+      name: `Aluno ${i + 1}`,
+      email: `aluno${i + 1}@university.edu`,
       phone: `+55 (11) 9876${i}-${5432 + i}`,
+      status: "ACTIVE",
+      enrolledAt: "2024-01-15",
       grade: 7 + Math.random(),
       attendance: 80 + Math.random() * 20,
       performance: 70 + Math.random() * 30,
@@ -122,7 +131,7 @@ describe("StudentsList", () => {
 
     render(<StudentsList students={manyStudents} />);
 
-    expect(screen.getByText("Aluno 0")).toBeInTheDocument();
-    expect(screen.getByText("Aluno 9")).toBeInTheDocument();
+    expect(screen.getByText("Aluno 1")).toBeInTheDocument();
+    expect(screen.getByText("Aluno 10")).toBeInTheDocument();
   });
 });

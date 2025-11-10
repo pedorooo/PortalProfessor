@@ -18,8 +18,6 @@ export function useClassLessons(classId: string) {
     const fetchLessons = async () => {
       try {
         setLoading(true);
-        // Simulando uma chamada API
-        // Em produção, seria: const response = await fetch(`/api/classes/${classId}/lessons`);
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         const mockLessons: ClassLesson[] = [

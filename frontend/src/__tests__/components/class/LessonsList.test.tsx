@@ -83,7 +83,6 @@ describe("LessonsList", () => {
   it("deve aplicar cores corretas aos badges de status", () => {
     const { container } = render(<LessonsList lessons={mockLessons} />);
 
-    // Verifica se há badges com classes de cor para cada status
     const greenBadge = container.querySelector(".bg-green-100.text-green-800");
     const blueBadge = container.querySelector(".bg-blue-100.text-blue-800");
     const grayBadge = container.querySelector(".bg-gray-100.text-gray-800");

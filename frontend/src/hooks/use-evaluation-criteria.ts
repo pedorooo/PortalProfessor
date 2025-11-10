@@ -1,88 +1,57 @@
 import { useState, useCallback } from "react";
+import { updateEvaluation } from "@/lib/api-client";
 
-export interface EvaluationCriteria {
-  id: string;
+export interface EvaluationWeight {
+  id: number;
   name: string;
-  weight: number;
-}
-
-interface EvaluationCriteriaState {
-  [classId: string]: EvaluationCriteria[];
+  gradeWeight: number;
 }
 
 export function useEvaluationCriteria() {
-  const [criteriaByClass, setCriteriaByClass] =
-    useState<EvaluationCriteriaState>({
-      // Mock initial data
-      "1": [
-        { id: "1", name: "Prova 1", weight: 30 },
-        { id: "2", name: "Prova 2", weight: 30 },
-        { id: "3", name: "Trabalho", weight: 20 },
-        { id: "4", name: "Participação", weight: 20 },
-      ],
-    });
+  const [criteria, setCriteria] = useState<EvaluationWeight[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const getCriteriaForClass = useCallback(
-    (classId: string) => {
-      return criteriaByClass[classId] || [];
-    },
-    [criteriaByClass]
-  );
+  const getCriteriaForClass = useCallback(() => {
+    return criteria;
+  }, [criteria]);
 
-  const getTotalWeight = useCallback(
-    (classId: string) => {
-      const criteria = getCriteriaForClass(classId);
-      return criteria.reduce((sum, c) => sum + c.weight, 0);
-    },
-    [getCriteriaForClass]
-  );
+  const getTotalWeight = useCallback(() => {
+    return criteria.reduce((sum, c) => sum + c.gradeWeight, 0);
+  }, [criteria]);
 
-  const addCriteria = useCallback(
-    (classId: string, name: string, weight: number) => {
-      setCriteriaByClass((prev) => {
-        const classCriteria = prev[classId] || [];
-        return {
-          ...prev,
-          [classId]: [
-            ...classCriteria,
-            { id: Date.now().toString(), name, weight },
-          ],
-        };
-      });
-    },
-    []
-  );
-
-  const updateCriteria = useCallback(
-    (classId: string, id: string, name: string, weight: number) => {
-      setCriteriaByClass((prev) => {
-        const classCriteria = prev[classId] || [];
-        return {
-          ...prev,
-          [classId]: classCriteria.map((c) =>
-            c.id === id ? { ...c, name, weight } : c
-          ),
-        };
-      });
-    },
-    []
-  );
-
-  const removeCriteria = useCallback((classId: string, id: string) => {
-    setCriteriaByClass((prev) => {
-      const classCriteria = prev[classId] || [];
-      return {
-        ...prev,
-        [classId]: classCriteria.filter((c) => c.id !== id),
-      };
-    });
+  const fetchCriteria = useCallback((evaluations: EvaluationWeight[]) => {
+    setCriteria(evaluations);
+    setError(null);
   }, []);
 
+  const updateCriteria = useCallback(
+    async (id: number, name: string, gradeWeight: number) => {
+      try {
+        setLoading(true);
+        await updateEvaluation(id, { name, gradeWeight });
+        setCriteria((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, name, gradeWeight } : c))
+        );
+        setError(null);
+      } catch (err) {
+        console.error("Erro ao atualizar avaliação:", err);
+        setError("Erro ao atualizar avaliação");
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   return {
+    criteria,
+    loading,
+    error,
     getCriteriaForClass,
     getTotalWeight,
-    addCriteria,
     updateCriteria,
-    removeCriteria,
+    fetchCriteria,
   };
 }

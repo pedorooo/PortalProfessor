@@ -65,7 +65,6 @@ describe("ClassInfo", () => {
   it("deve manter os ícones nos cards", () => {
     const { container } = render(<ClassInfo {...defaultProps} />);
 
-    // Verifica se há elementos com role de img (ícones)
     const icons = container.querySelectorAll("svg");
     expect(icons.length).toBeGreaterThan(0);
   });

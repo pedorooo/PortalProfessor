@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Menu, LogOut, User, BookMarked } from "lucide-react";
+import { Menu, LogOut, User, BookOpen, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +33,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </Button>
 
           <div className="items-center gap-2 font-bold text-lg hidden md:flex">
-            <BookMarked className="w-5 h-5" />
+            <BookOpen className="w-5 h-5" />
             <h1 className="text-xl">Portal do Professor</h1>
           </div>
         </div>
@@ -41,9 +41,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2">
-              <Avatar className="w-8 h-8">
+              <Avatar className="w-8 h-8 flex items-center justify-center">
                 <AvatarFallback className="text-xs">
-                  {user?.name?.charAt(0).toUpperCase()}
+                  <UserRound className="w-5 h-5" />
                 </AvatarFallback>
               </Avatar>
               <span className="hidden sm:inline text-sm">{user?.name}</span>

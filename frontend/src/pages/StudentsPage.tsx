@@ -44,8 +44,14 @@ import { StudentDialog } from "@/components/students/student-dialog";
 import type { Student } from "@/types";
 
 export default function StudentsPage() {
-  const { students, isLoading, addStudent, updateStudent, deleteStudent } =
-    useStudents();
+  const {
+    students,
+    isLoading,
+    error,
+    addStudent,
+    updateStudent,
+    deleteStudent,
+  } = useStudents();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -112,7 +118,10 @@ export default function StudentsPage() {
             Gerencie e acompanhe seus alunos
           </p>
         </div>
-        <Button onClick={() => handleDialogOpenChange(true)} className="gap-2">
+        <Button
+          onClick={() => handleDialogOpenChange(true)}
+          className="gap-2 bg-purple-600 hover:bg-purple-700"
+        >
           <Plus className="h-4 w-4" />
           Adicionar Aluno
         </Button>
@@ -120,7 +129,14 @@ export default function StudentsPage() {
 
       <Card>
         <CardContent className="pt-6 space-y-6">
-          {/* Search and Filters */}
+          {}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md">
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {}
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2>Lista de alunos</h2>
@@ -171,11 +187,20 @@ export default function StudentsPage() {
             </div>
           </div>
 
-          {filteredStudents.length === 0 ? (
+          {}
+          {isLoading && students.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Carregando alunos...</p>
+            </div>
+          )}
+
+          {!isLoading && filteredStudents.length === 0 && (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Nenhum aluno encontrado</p>
             </div>
-          ) : (
+          )}
+
+          {!isLoading && filteredStudents.length > 0 && (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -213,7 +238,7 @@ export default function StudentsPage() {
                       </TableCell>
                       <TableCell className="py-4">{student.class}</TableCell>
                       <TableCell className="py-4 text-right font-semibold text-orange-500">
-                        {student.grade || "N/A"}
+                        {student.grade ? student.grade.toFixed(1) : "N/A"}
                       </TableCell>
                       <TableCell className="py-4">
                         <span

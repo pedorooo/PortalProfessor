@@ -1,95 +1,127 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Student } from "@/types";
+import {
+  getStudents,
+  createStudent,
+  updateStudent as apiUpdateStudent,
+  deleteStudent as apiDeleteStudent,
+  type StudentApiResponse,
+  type CreateStudentPayload,
+  type UpdateStudentPayload,
+} from "@/lib/api-client";
 
-const mockStudents: Student[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "(11) 98765-4321",
-    grade: 8.5,
-    class: "Class A",
-    status: "active",
-    enrollmentDate: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    phone: "(11) 98765-4322",
-    grade: 9.2,
-    class: "Class B",
-    status: "inactive",
-    enrollmentDate: "2024-02-01",
-  },
-  {
-    id: "3",
-    name: "Bob Johnson",
-    email: "bob.johnson@example.com",
-    phone: "(11) 98765-4323",
-    grade: 7.8,
-    class: "Class A",
-    status: "inactive",
-    enrollmentDate: "2023-12-10",
-  },
-  {
-    id: "4",
-    name: "Alice Williams",
-    email: "alice.williams@example.com",
-    phone: "(11) 98765-4324",
-    grade: 8.9,
-    class: "Class C",
-    status: "active",
-    enrollmentDate: "2024-01-20",
-  },
-  {
-    id: "5",
-    name: "Charlie Brown",
-    email: "charlie.brown@example.com",
-    phone: "(11) 98765-4325",
-    grade: 7.5,
-    class: "Class B",
-    status: "active",
-    enrollmentDate: "2024-01-10",
-  },
-];
+function transformStudent(apiStudent: StudentApiResponse): Student {
+  return {
+    id: apiStudent.id.toString(),
+    name: apiStudent.name,
+    email: apiStudent.email,
+    phone: apiStudent.phone || undefined,
+    class: apiStudent.className || "N/A",
+    classId: apiStudent.classId,
+    status: apiStudent.status.toLowerCase() as "active" | "inactive",
+    enrollmentDate: apiStudent.createdAt,
+    grade: apiStudent.grade,
+  };
+}
 
 export function useStudents() {
-  const [students, setStudents] = useState<Student[]>(mockStudents);
+  const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addStudent = useCallback((student: Omit<Student, "id">) => {
+  useEffect(() => {
+    loadStudents();
+  }, []);
+
+  const loadStudents = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const newStudent: Student = {
-        ...student,
-        id: Date.now().toString(),
+    setError(null);
+    try {
+      const response = await getStudents(1, 100);
+      const transformedStudents = response.data.map(transformStudent);
+      setStudents(transformedStudents);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load students");
+      console.error("Error loading students:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addStudent = useCallback(async (student: Omit<Student, "id">) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const payload: CreateStudentPayload = {
+        name: student.name,
+        email: student.email,
+        password: "password123",
+        phone: student.phone,
+        classId: student.classId,
+        status: student.status?.toUpperCase(),
       };
-      setStudents((prev) => [newStudent, ...prev]);
+
+      const newStudent = await createStudent(payload);
+      const transformed = transformStudent(newStudent);
+      setStudents((prev) => [transformed, ...prev]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create student");
+      console.error("Error creating student:", err);
+      throw err;
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   }, []);
 
-  const updateStudent = useCallback((id: string, updates: Partial<Student>) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setStudents((prev) =>
-        prev.map((student) =>
-          student.id === id ? { ...student, ...updates } : student
-        )
-      );
-      setIsLoading(false);
-    }, 500);
-  }, []);
+  const updateStudent = useCallback(
+    async (id: string, updates: Partial<Student>) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const payload: UpdateStudentPayload = {};
 
-  const deleteStudent = useCallback((id: string) => {
+        if (updates.name) payload.name = updates.name;
+        if (updates.email) payload.email = updates.email;
+        if (updates.phone !== undefined) payload.phone = updates.phone;
+        if (updates.status) payload.status = updates.status.toUpperCase();
+
+        const updated = await apiUpdateStudent(
+          Number.parseInt(id, 10),
+          payload
+        );
+        const transformed = transformStudent(updated);
+
+        setStudents((prev) =>
+          prev.map((student) => (student.id === id ? transformed : student))
+        );
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update student"
+        );
+        console.error("Error updating student:", err);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const deleteStudent = useCallback(async (id: string) => {
     setIsLoading(true);
-    setTimeout(() => {
+    setError(null);
+    try {
+      await apiDeleteStudent(Number.parseInt(id, 10));
       setStudents((prev) => prev.filter((student) => student.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete student");
+      console.error("Error deleting student:", err);
+      throw err;
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   }, []);
 
   const filterStudents = useCallback(
@@ -111,9 +143,11 @@ export function useStudents() {
   return {
     students,
     isLoading,
+    error,
     addStudent,
     updateStudent,
     deleteStudent,
     filterStudents,
+    refreshStudents: loadStudents,
   };
 }

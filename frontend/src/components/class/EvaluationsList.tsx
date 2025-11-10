@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import type { ClassEvaluation } from "@/hooks/use-class-evaluations";
+import { FileText, Calendar, TrendingUp } from "lucide-react";
 
 interface EvaluationsListProps {
   readonly evaluations: ClassEvaluation[];
@@ -38,66 +39,58 @@ export function EvaluationsList({
     <Card>
       <CardContent className="pt-6">
         <div className="space-y-4">
-          {evaluations.map((evaluation) => {
-            let statusClass = "bg-blue-100 text-blue-800";
-            if (evaluation.status === "Corrigida") {
-              statusClass = "bg-green-100 text-green-800";
-            } else if (evaluation.status === "Pendente") {
-              statusClass = "bg-yellow-100 text-yellow-800";
-            }
-
-            const submissionPercentage =
-              (evaluation.submitted / evaluation.total) * 100;
-
-            return (
-              <div
-                key={evaluation.id}
-                className="p-4 border rounded-lg hover:bg-gray-50 transition-colors space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{evaluation.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Data de entrega: {evaluation.dueDate}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 text-xs font-semibold rounded-full ${statusClass}`}
-                  >
-                    {evaluation.status}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-6 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Entregas
-                    </p>
-                    <p className="font-semibold">
-                      {evaluation.submitted}/{evaluation.total}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Taxa de Entrega
-                    </p>
-                    <div className="w-24 h-2 bg-gray-200 rounded-full">
-                      <div
-                        className="h-full bg-purple-600 rounded-full"
-                        style={{ width: `${submissionPercentage}%` }}
-                      />
+          {evaluations.map((evaluation) => (
+            <div
+              key={evaluation.id}
+              className="flex flex-col sm:flex-row items-start justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors gap-4"
+            >
+              <div className="flex-1 min-w-0 w-full sm:w-auto">
+                <div className="flex items-start gap-2">
+                  <FileText className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{evaluation.name}</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4 flex-shrink-0" />
+                        <span>{evaluation.dueDate}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="h-4 w-4 flex-shrink-0" />
+                        <span>Peso: {evaluation.gradeWeight || 0}%</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Peso</p>
-                    <p className="font-semibold">{evaluation.weight}%</p>
                   </div>
                 </div>
               </div>
-            );
-          })}
+
+              <div className="flex gap-8 text-right flex-shrink-0">
+                <div>
+                  <p className="text-xs text-muted-foreground">Entregas</p>
+                  <p className="text-lg font-bold text-purple-600">
+                    {evaluation.submitted || 0}/{evaluation.total || 0}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                      evaluation.status === "OPEN"
+                        ? "bg-green-100 text-green-700"
+                        : evaluation.status === "CLOSED"
+                        ? "bg-gray-100 text-gray-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {evaluation.status === "OPEN"
+                      ? "Em Andamento"
+                      : evaluation.status === "CLOSED"
+                      ? "Fechada"
+                      : evaluation.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
