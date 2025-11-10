@@ -9,6 +9,7 @@ import { ClassesFilters } from "@/components/classes/classes-filters";
 import { ClassesGrid } from "@/components/classes/classes-grid";
 import { EmptyState } from "@/components/classes/empty-state";
 import { DeleteConfirmDialog } from "@/components/classes/delete-confirm-dialog";
+import { PageLoader } from "@/components/ui/page-loader";
 import type { Class } from "@/types";
 
 export default function ClassesPage() {
@@ -113,7 +114,9 @@ export default function ClassesPage() {
         onSubjectChange={setSelectedSubject}
       />
 
-      {classes.length === 0 ? (
+      {isLoading ? (
+        <PageLoader message="Carregando turmas..." />
+      ) : classes.length === 0 ? (
         <EmptyState searchTerm={searchTerm} onAddClick={handleAddClick} />
       ) : (
         <ClassesGrid

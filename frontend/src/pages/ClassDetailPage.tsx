@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageLoader } from "@/components/ui/page-loader";
 import { useClassStudents } from "@/hooks/use-class-students";
 import { useClassEvaluations } from "@/hooks/use-class-evaluations";
 import { ClassHeader } from "@/components/class/ClassHeader";
@@ -24,6 +25,7 @@ export default function ClassDetailPage() {
   const { classId } = useParams<{ classId: string }>();
   const toastContext = useToast();
   const [classData, setClassData] = useState<ClassApiResponse | null>(null);
+  const [isLoadingClass, setIsLoadingClass] = useState(true);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [studentsRefreshKey, setStudentsRefreshKey] = useState(0);
@@ -31,6 +33,7 @@ export default function ClassDetailPage() {
   useEffect(() => {
     const fetchClass = async () => {
       try {
+        setIsLoadingClass(true);
         if (!classId) return;
         const classIdNumber = Number.parseInt(classId, 10);
         const data = await getClassById(classIdNumber);
@@ -38,14 +41,21 @@ export default function ClassDetailPage() {
       } catch (error: unknown) {
         console.error("Failed to load class:", error);
         toastContext.error("Erro ao carregar turma");
+      } finally {
+        setIsLoadingClass(false);
       }
     };
 
     fetchClass();
   }, [classId, toastContext, studentsRefreshKey]);
 
-  const { students } = useClassStudents(classId || "", studentsRefreshKey);
-  const { evaluations } = useClassEvaluations(classId || "");
+  const { students, loading: studentsLoading } = useClassStudents(
+    classId || "",
+    studentsRefreshKey
+  );
+  const { evaluations, loading: evaluationsLoading } = useClassEvaluations(
+    classId || ""
+  );
 
   const refreshData = async () => {
     if (!classId) return;
@@ -90,6 +100,10 @@ export default function ClassDetailPage() {
       setIsEnrolling(false);
     }
   };
+
+  if (isLoadingClass) {
+    return <PageLoader />;
+  }
 
   if (!classData) {
     return (
@@ -172,7 +186,7 @@ export default function ClassDetailPage() {
               </Button>
             </div>
           </div>
-          <StudentsList students={students} />
+          <StudentsList students={students} isLoading={studentsLoading} />
         </TabsContent>
 
         {}
@@ -202,7 +216,10 @@ export default function ClassDetailPage() {
               Configurar Pesos
             </Button>
           </div>
-          <EvaluationsList evaluations={evaluations} />
+          <EvaluationsList
+            evaluations={evaluations}
+            isLoading={evaluationsLoading}
+          />
         </TabsContent>
       </Tabs>
 

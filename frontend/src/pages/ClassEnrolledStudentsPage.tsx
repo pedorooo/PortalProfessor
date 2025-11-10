@@ -2,19 +2,28 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { PageLoader } from "@/components/ui/page-loader";
 import { useClasses } from "@/hooks/use-classes";
 import { useClassStudents } from "@/hooks/use-class-students";
 
 export default function ClassEnrolledStudentsPage() {
   const navigate = useNavigate();
   const { classId } = useParams<{ classId: string }>();
-  const { classes } = useClasses();
-  const { students: mockStudents } = useClassStudents(classId || "");
+  const { classes, isLoading: classesLoading } = useClasses();
+  const { students: mockStudents, loading: studentsLoading } = useClassStudents(
+    classId || ""
+  );
 
   const classIdNumber = classId ? Number.parseInt(classId, 10) : undefined;
   const classData = classIdNumber
     ? classes.find((cls) => cls.id === classIdNumber)
     : undefined;
+
+  const isLoading = classesLoading || studentsLoading;
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
 
   if (!classData) {
     return (
