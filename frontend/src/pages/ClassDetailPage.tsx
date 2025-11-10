@@ -19,7 +19,7 @@ import { getClassById } from "@/lib/api-client";
 import type { ClassApiResponse } from "@/lib/api/classes";
 import { createStudent } from "@/lib/api/students";
 import { useToast } from "@/context/ToastContext";
-import { Plus } from "lucide-react";
+import { Plus, Settings2 } from "lucide-react";
 
 export default function ClassDetailPage() {
   const navigate = useNavigate();
@@ -197,14 +197,19 @@ export default function ClassDetailPage() {
             <h2 className="text-2xl font-bold">Avaliações</h2>
             <div className="flex gap-2">
               <Button
+                className="gap-2 bg-purple-600 hover:bg-purple-700 text-white hover:text-white"
                 variant="outline"
                 onClick={() =>
                   navigate(`/dashboard/classes/${classId}/evaluation-config`)
                 }
               >
+                <span>
+                  <Settings2 className="h-4 w-4 mr-2" />
+                </span>
                 Configurar Pesos
               </Button>
               <Button
+                variant={"outline"}
                 onClick={() =>
                   navigate(`/dashboard/classes/${classId}/evaluations`)
                 }

@@ -58,7 +58,7 @@ export function StudentsList({
                 </div>
               </div>
 
-              <div className="flex gap-8 text-right flex-shrink-0">
+              {/* <div className="flex gap-8 text-right flex-shrink-0">
                 <div>
                   <p className="text-xs text-muted-foreground">Média</p>
                   <p className="text-lg font-bold text-orange-500">
@@ -71,7 +71,7 @@ export function StudentsList({
                     {student.attendance}%
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

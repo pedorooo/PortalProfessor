@@ -64,15 +64,17 @@ export default function ClassEnrolledStudentsPage() {
                       <Mail className="h-4 w-4" />
                       {student.email}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Phone className="h-4 w-4" />
-                      {student.phone}
-                    </div>
+                    {student.phone && (
+                      <div className="flex items-center gap-1">
+                        <Phone className="h-4 w-4" />
+                        {student.phone}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex gap-8 text-right">
-                  <div>
+                  {/* <div>
                     <p className="text-xs text-muted-foreground">Média</p>
                     <p className="text-lg font-bold text-orange-500">
                       {student.grade}
@@ -92,7 +94,7 @@ export default function ClassEnrolledStudentsPage() {
                         style={{ width: `${student.performance}%` }}
                       />
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}
